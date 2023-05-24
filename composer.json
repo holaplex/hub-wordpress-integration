@@ -1,0 +1,25 @@
+{
+  "name": "holaplex/holaplex-integration",
+  "type": "wordpress-plugin",
+  "description": "Integration plugin for Holaplex and WordPress WooCommerce",
+  "authors": [
+    {
+      "name": "Holaplex Dev",
+      "email": "dev@holaplex.com"
+    }
+  ],
+  "require": {
+    "php": ">=5.6"
+  },
+  "autoload": {
+    "psr-4": {
+      "Holaplex\\HolaplexIntegration\\": "src/"
+    }
+  },
+  "extra": {
+    "wordpress-plugin": {
+      "main": "holaplex-wp.php",
+      "namespace": "Holaplex\\HolaplexIntegration"
+    }
+  }
+}

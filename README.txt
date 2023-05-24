@@ -1,4 +1,4 @@
-=== Holaplex Integration Plugin for WordPress WooCommerce ===
+=== Holaplex Integration Plugin for WordPress ===
 Contributors: k0d3d
 Tags: woocommerce, holaplex, nft, integration
 Requires at least: 5.0
@@ -8,9 +8,9 @@ License: MIT License
 License URI: https://opensource.org/licenses/MIT
 
 == Description ==
-The Holaplex Integration Plugin for WordPress WooCommerce enables seamless integration 
+The Holaplex Integration Plugin for WordPress enables seamless integration 
 between your WooCommerce-powered online store and Holaplex, a Web3 NFT Platform. 
-This plugin allows you to sync and sell NFTs created on Holaplex directly through your WooCommerce store.
+This plugin allows you to sync and sell NFTs created on Holaplex directly through your Wordpress site.
 
 == Features ==
 
