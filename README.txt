@@ -1,5 +1,5 @@
 === Holaplex Integration Plugin for WordPress WooCommerce ===
-Contributors: Your Name
+Contributors: k0d3d
 Tags: woocommerce, holaplex, nft, integration
 Requires at least: 5.0
 Tested up to: 5.8

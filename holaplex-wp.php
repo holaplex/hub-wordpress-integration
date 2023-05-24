@@ -8,17 +8,17 @@
  * registers the activation and deactivation functions, and defines a function
  * that starts the plugin.
  *
- * @link              http://example.com
+ * @link              http://holaplex.com
  * @since             1.0.0
  * @package           Holaplex_Wp
  *
  * @wordpress-plugin
- * Plugin Name:       WordPress Plugin Boilerplate
- * Plugin URI:        http://example.com/holaplex-wp-uri/
- * Description:       This is a short description of what the plugin does. It's displayed in the WordPress admin area.
+ * Plugin Name:       Holaplex Integration Plugin for WordPress WooCommerce
+ * Plugin URI:        http://holaplex.com/holaplex-wp/
+ * Description:       This plugin allows you to sync and mint NFTs created on Holaplex directly through your WooCommerce store.
  * Version:           1.0.0
- * Author:            Your Name or Your Company
- * Author URI:        http://example.com/
+ * Author:            Holaplex.com
+ * Author URI:        http://holaplex.com/
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  * Text Domain:       holaplex-wp
