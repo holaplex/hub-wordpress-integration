@@ -171,6 +171,20 @@ class Holaplex_Wp_Admin
 				projects {
 					id
 					name
+					drops {
+						id
+						projectId
+						creationStatus
+						startTime
+						endTime
+						price
+						createdAt
+						shutdownAt
+						collection {
+							supply
+						}
+						status
+					}
 				}
 			}
 		}
@@ -215,46 +229,96 @@ class Holaplex_Wp_Admin
 		function holaplex_woo_settings_page($holaplex_projects, $holaplex_status)
 		{
 
+			function showSyncActions($drop_id) {
+				// check if a woocommerce product exist with a metakey "drop_id" and meta-value $drop_id
+				$products = get_posts( array(
+					'post_type' => 'product',
+					'meta_key' => 'drop_id',
+					'meta_value' => $drop_id,
+					'numberposts' => 1
+				) );
+				//if products exist, show "synced", else show sync button
+				if (count($products) > 0) {
+					return '<span class="synced">Synced</span>';
+				} else {
+					return '<button class="sync" data-drop-id="' . esc_attr($drop_id) . '">Sync</button>';
+				}
+
+			}
+
 ?>
-			<h2><?php _e('Holaplex Settings', 'holaplex-wp'); ?></h2>
-			<table class="form-table">
-				<tbody>
-					<tr valign="top">
-						<th scope="row"><?php _e('Connection Status', 'holaplex-wp'); ?></th>
-						<td>
-							<input readonly type="text" name="holaplex_connection_status" value="<?php echo esc_attr($holaplex_status); ?>">
-							<p class="description"><?php _e('Enter the connection status', 'holaplex-wp'); ?></p>
-						</td>
-					</tr>
-					<tr valign="top">
-						<th scope="row"><?php _e('Organization Id', 'holaplex-wp'); ?></th>
-						<td>
-							<input type="text" name="holaplex_org_id" value="<?php echo esc_attr(get_option('holaplex_org_id')); ?>">
-							<p class="description"><?php _e('Enter Organization Id', 'holaplex-wp'); ?></p>
-						</td>
-					</tr>
-					<tr valign="top">
-						<th scope="row"><?php _e('API Key', 'holaplex-wp'); ?></th>
-						<td>
-							<input type="text" name="holaplex_api_key" value="<?php echo esc_attr(get_option('holaplex_api_key')); ?>">
-							<p class="description"><?php _e('Enter the API key', 'holaplex-wp'); ?></p>
-						</td>
-					</tr>
-					<tr valign="top">
-						<th scope="row"><?php _e('Project', 'holaplex-wp'); ?></th>
-						<td>
-							<select name="holaplex_project">
-								<?php
-								   foreach ($holaplex_projects as $project) {
-									   echo '<option value="' . $project['id'] . '">' . $project['name'] . '</option>';
-								   }
-								?>
-							</select>
-							<p class="description"><?php _e('Select the project', 'holaplex-wp'); ?></p>
-						</td>
-					</tr>
-				</tbody>
-			</table>
+			<div class="container holaplex-app">
+				<section>
+					<h2><?php _e('Holaplex Settings', 'holaplex-wp'); ?></h2>
+					<table class="form-table">
+						<tbody>
+							<tr valign="top">
+								<th scope="row"><?php _e('Connection Status', 'holaplex-wp'); ?></th>
+								<td>
+									<input readonly type="text" name="holaplex_connection_status" value="<?php echo esc_attr($holaplex_status); ?>">
+									<p class="description"><?php _e('Enter the connection status', 'holaplex-wp'); ?></p>
+								</td>
+							</tr>
+							<tr valign="top">
+								<th scope="row"><?php _e('Organization Id', 'holaplex-wp'); ?></th>
+								<td>
+									<input type="text" name="holaplex_org_id" value="<?php echo esc_attr(get_option('holaplex_org_id')); ?>">
+									<p class="description"><?php _e('Enter Organization Id', 'holaplex-wp'); ?></p>
+								</td>
+							</tr>
+							<tr valign="top">
+								<th scope="row"><?php _e('API Key', 'holaplex-wp'); ?></th>
+								<td>
+									<input type="text" name="holaplex_api_key" value="<?php echo esc_attr(get_option('holaplex_api_key')); ?>">
+									<p class="description"><?php _e('Enter the API key', 'holaplex-wp'); ?></p>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</section>
+				<section>
+					<?php
+						// if no projects, show a message and return
+						if (empty($holaplex_projects)) {
+							echo '<p class="description">No projects listed.</p>';
+							return;
+						}
+					?>	
+					<h2><?php _e('Project Drops', 'holaplex-wp'); ?></h2>
+					<p class="description">
+						Creates a product for each drop in your Holaplex projects.
+					</p>
+
+					<ul class="responsive-table">
+						<li class="table-header">
+							<div class="col-1">Project</div>
+							<div class="col-2">Drop name</div>
+							<div class="col-1">Supply</div>
+							<div class="col-1">Status</div>
+							<div class="col-1">Sync</div>
+						</li>
+						<!-- loop through project drops -->
+						<?php foreach ($holaplex_projects as $project) {
+								foreach ($project['drops'] as $drop) {
+									$project_name = $project['name'];
+									$drop_id = substr($drop['id'], -6);
+									$collection_supply = $drop['collection']['supply'];
+									$drop_status = $drop['status'];
+									
+									echo '<li class="table-row">';
+									echo '<div class="col-1">' . esc_html($project_name) . '</div>';
+									echo '<div class="col-2">' . esc_html($drop_id) . '</div>';
+									echo '<div class="col-1">' . esc_html($collection_supply) . '</div>';
+									echo '<div class="col-1">' . esc_html($drop_status) . '</div>';
+									// echo '<div class="col-1">' . esc_html($drop_status) . '</div>';
+									echo '<div class="col-1">'. showSyncActions($drop['id']) .'</div>';
+									echo '</li>';
+								}
+							}
+							?>
+					</ul>
+				</section>
+			</div>
 <?php
 		}
 
