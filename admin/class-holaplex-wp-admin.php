@@ -162,6 +162,10 @@ class Holaplex_Wp_Admin
 		}
 	}
 
+	public function register_ajax_route () {
+
+	}
+
 	private function login_to_holaplex()
 	{
 		$id = get_option('holaplex_org_id');
@@ -213,7 +217,7 @@ class Holaplex_Wp_Admin
 
 		function holaplex_add_settings_tab($tabs)
 		{
-			$tabs['holaplex_settings'] = __('Holaplex', 'holaplex-wp');
+			$tabs['holaplex_settings'] = __('Holaplex Hub', 'holaplex-wp');
 			return $tabs;
 		}
 
@@ -267,10 +271,10 @@ class Holaplex_Wp_Admin
 								</td>
 							</tr>
 							<tr valign="top">
-								<th scope="row"><?php _e('API Key', 'holaplex-wp'); ?></th>
+								<th scope="row"><?php _e('API Token', 'holaplex-wp'); ?></th>
 								<td>
 									<input type="text" name="holaplex_api_key" value="<?php echo esc_attr(get_option('holaplex_api_key')); ?>">
-									<p class="description"><?php _e('Enter the API key', 'holaplex-wp'); ?></p>
+									<p class="description"><?php _e('Enter the API Token', 'holaplex-wp'); ?></p>
 								</td>
 							</tr>
 						</tbody>
