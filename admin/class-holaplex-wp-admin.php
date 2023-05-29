@@ -59,7 +59,10 @@ class Holaplex_Wp_Admin
 		$this->version = $version;
 		$this->add_holaplex_menu();
 		$this->login_to_holaplex();
-		$this->handle_ajax_sync_product_with_item();
+		$this->init_ajax_sync_product_with_item();
+		$this->init_add_holaplex_customer_id_field();
+		$this->init_save_holaplex_customer_id_field();
+
 	}
 
 	/**
@@ -112,7 +115,46 @@ class Holaplex_Wp_Admin
 	}
 
 
-	public function handle_ajax_sync_product_with_item () {
+	public function init_save_holaplex_customer_id_field () 
+	{
+		function save_holaplex_customer_id_field($user_id) {
+				if (current_user_can('edit_user', $user_id) && isset($_POST['holaplex_customer_id'])) {
+						$holaplex_customer_id = sanitize_text_field($_POST['holaplex_customer_id']);
+						update_user_meta($user_id, 'holaplex_customer_id', $holaplex_customer_id);
+				}
+		}
+		add_action('personal_options_update', 'save_holaplex_customer_id_field');
+		add_action('edit_user_profile_update', 'save_holaplex_customer_id_field');
+	
+	}
+
+
+
+	public function init_add_holaplex_customer_id_field () 
+	{
+		function add_holaplex_customer_id_field($user) {
+			$holaplex_customer_id = get_user_meta($user->ID, 'holaplex_customer_id', true);
+				?>
+				<h3><?php _e('Holaplex Customer ID', 'holaplex-wp'); ?></h3>
+				<table class="form-table">
+						<tr>
+								<th>
+										<label for="holaplex_customer_id"><?php _e('Holaplex Customer ID', 'holaplex-wp'); ?></label>
+								</th>
+								<td>
+										<input readonly type="text" name="holaplex_customer_id" id="holaplex_customer_id" value="<?php echo esc_attr($holaplex_customer_id); ?>" class="regular-text" />
+								</td>
+						</tr>
+				</table>
+				<?php
+		}
+		add_action('show_user_profile', 'add_holaplex_customer_id_field');
+		add_action('edit_user_profile', 'add_holaplex_customer_id_field');
+	
+	}
+
+
+	public function init_ajax_sync_product_with_item () {
 		function add_product_with_drop_id_callback() {
 				$drop_id = $_POST['drop_id'];
 				

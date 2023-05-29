@@ -52,6 +52,8 @@ class Holaplex_Wp_Public {
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
 
+		$this->init_display_holaplex_customer_details_on_profile();
+
 	}
 
 	/**
@@ -99,5 +101,71 @@ class Holaplex_Wp_Public {
 		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/holaplex-wp-public.js', array( 'jquery' ), $this->version, false );
 
 	}
+
+
+	public function init_display_holaplex_customer_details_on_profile () {
+		function holaplex_customer_details_shortcode($atts) {
+			$current_user = wp_get_current_user();
+			$holaplex_customer_id = get_user_meta($current_user->ID, 'holaplex_customer_id', true);
+			
+			if (!empty($holaplex_customer_id)) {
+		?>
+
+			<div class="holaplex-app">
+				<div class="holaplex-app__header">
+					<div class="holaplex-app__header__title">
+						<h3><?php echo esc_html(__('Holaplex Customer Details', 'holaplex-wp')); ?></h3>
+					</div>
+				</div>
+				<div class="holaplex-app__body">
+					<div class="holaplex-app__body__content">
+						<div class="holaplex-app__body__content__section">
+							<div class="holaplex-app__body__content__section__title">
+								<h4><?php echo esc_html(__('Customer ID', 'holaplex-wp')); ?></h4>
+							</div>
+							<div class="holaplex-app__body__content__section__content">
+								<p><?php echo esc_html(substr($holaplex_customer_id, -6)); ?></p>
+							</div>
+						</div>
+						<div class="holaplex-app__body__content__section">
+							<div class="holaplex-app__body__content__section__title">
+								<h4><?php echo esc_html(__('Wallet Address', 'holaplex-wp')); ?></h4>
+							</div>
+							<div class="holaplex-app__body__content__section__content">
+								<p><?php echo esc_html(get_user_meta($current_user->ID, 'holaplex_wallet_address', true)); ?></p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+		<?php
+
+			} else {
+				
+		?>
+			<div class="holaplex-app">
+				<div class="holaplex-app__header">
+					<div class="holaplex-app__header__title">
+						<h3><?php echo esc_html(__('Holaplex Customer Details', 'holaplex-wp')); ?></h3>
+					</div>
+				</div>
+				<div class="holaplex-app__body">
+					<div class="holaplex-app__body__content">
+						<div class="holaplex-app__body__content__section">
+							<div class="holaplex-app__body__content__section__content">
+								<p><button id="create-customer-button"><?php echo esc_html(__('Create Customer and Wallet', 'holaplex-wp')); ?></button></p>
+							</div>
+						</div>
+					</div>
+			</div>
+		<?php
+
+			}
+			
+	}
+
+	add_action('woocommerce_edit_account_form', 'holaplex_customer_details_shortcode');	
+}
 
 }
