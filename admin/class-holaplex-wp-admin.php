@@ -59,6 +59,7 @@ class Holaplex_Wp_Admin
 		$this->version = $version;
 		$this->add_holaplex_menu();
 		$this->login_to_holaplex();
+		$this->handle_ajax_sync_product_with_item();
 	}
 
 	/**
@@ -105,6 +106,26 @@ class Holaplex_Wp_Admin
 		 */
 
 		wp_enqueue_script($this->plugin_name, plugin_dir_url(__FILE__) . 'js/holaplex-wp-admin.js', array('jquery'), $this->version, false);
+		wp_enqueue_script( 'holaplex-ajax-admin' , plugin_dir_url(__FILE__) . 'js/holaplex-ajax-admin.js', array('jquery'), $this->version, false);
+
+    wp_localize_script('holaplex-ajax-admin', 'holaplex_wp_ajax', array('ajax_url' => admin_url('admin-ajax.php')));
+	}
+
+
+	public function handle_ajax_sync_product_with_item () {
+		function add_product_with_drop_id_callback() {
+				$drop_id = $_POST['drop_id'];
+				
+				// Call your add_product_with_drop_id function here with the $drop_id
+				
+				// Example response
+				$response = array('success' => true);
+				
+				wp_send_json($response);
+		}
+		add_action('wp_ajax_add_product_with_drop_id', 'add_product_with_drop_id_callback');
+		add_action('wp_ajax_nopriv_add_product_with_drop_id', 'add_product_with_drop_id_callback');
+	
 	}
 
 
@@ -245,7 +266,7 @@ class Holaplex_Wp_Admin
 				if (count($products) > 0) {
 					return '<span class="synced">Synced</span>';
 				} else {
-					return '<button class="sync" data-drop-id="' . esc_attr($drop_id) . '">Sync</button>';
+					return '<button id="sync-btn" data-drop-id="' . esc_attr($drop_id) . '">Sync</button>';
 				}
 
 			}
@@ -284,7 +305,15 @@ class Holaplex_Wp_Admin
 					<?php
 						// if no projects, show a message and return
 						if (empty($holaplex_projects)) {
-							echo '<p class="description">No projects listed.</p>';
+							echo "<h2 class='help-title'>".esc_html(__('Setup Help', 'holaplex-wp'))."</h2>";
+							echo "<p class='description help-mesg'>
+							To connect to Holaplex Hub, enter an API token and associated Organization ID below. <br/>
+							An API token can be generated on the Credentials tab of your Organization's page on Hub: <a target='_blank' href='https://hub.holaplex.com/credentials'>https://hub.holaplex.com/credentials</a>. <br/>
+							You can find your Organization ID by clicking the menu button in the upper left corner, next to your organization's name. <br/>
+							For more info, please see <a  target='_blank' href='https://docs.holaplex.com/category/guides/woocommerce-plugin' > https://docs.holaplex.com/category/guides/woocommerce-plugin</a><br/>
+							If you do not already have a Holaplex Hub account, you can create one at <a target='_blank' href='https://hub.holaplex.com/'>https://hub.holaplex.com/</a><br/>
+							
+							</p>";
 							return;
 						}
 					?>	
@@ -323,6 +352,7 @@ class Holaplex_Wp_Admin
 					</ul>
 				</section>
 			</div>
+			<div class="clear"></div>
 <?php
 		}
 

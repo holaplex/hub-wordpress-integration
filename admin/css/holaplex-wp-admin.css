@@ -24,6 +24,10 @@
   width: 50%;
   margin-right: 56px;
 }
+.help-mesg {
+  font-size: 15px;
+  line-height: 2;
+}
 
 .responsive-table li {
   border-radius: 3px;
