@@ -53,6 +53,7 @@ class Holaplex_Wp_Public {
 		$this->version = $version;
 
 		$this->init_display_holaplex_customer_details_on_profile();
+		$this->init_create_customer_wallet_callback();
 
 	}
 
@@ -99,11 +100,13 @@ class Holaplex_Wp_Public {
 		 */
 
 		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/holaplex-wp-public.js', array( 'jquery' ), $this->version, false );
-
+    wp_enqueue_script('holaplex_ajax_public', plugin_dir_url( __FILE__ ) . 'js/holaplex-ajax-public.js', array('jquery'), $this->version, true);
+    wp_localize_script('holaplex_ajax_public', 'holaplex_ajax', array('ajax_url' => admin_url('admin-ajax.php')));
 	}
 
 
-	public function init_display_holaplex_customer_details_on_profile () {
+	public function init_display_holaplex_customer_details_on_profile () 
+	{
 		function holaplex_customer_details_shortcode($atts) {
 			$current_user = wp_get_current_user();
 			$holaplex_customer_id = get_user_meta($current_user->ID, 'holaplex_customer_id', true);
@@ -163,9 +166,66 @@ class Holaplex_Wp_Public {
 
 			}
 			
+		}
+
+		add_action('woocommerce_edit_account_form', 'holaplex_customer_details_shortcode');	
 	}
 
-	add_action('woocommerce_edit_account_form', 'holaplex_customer_details_shortcode');	
-}
+	public function init_create_customer_wallet_callback() {
+			function create_customer_wallet_callback() {
+				// Call your create_customer_wallet function here
+				$create_customer_query = <<<'EOT'
+				mutation CreateCustomer($input: CreateCustomerInput!) {
+					createCustomer(input: $input) {
+						customer {
+							id
+						}
+					}
+				}
+				EOT;
+		
+				$create_customer_variables = [
+					'input' => [
+						'project' => get_option('holaplex_project'),
+					],
+				];
+				$core = new Holaplex_Core();
+				$response = $core->send_graphql_request($create_customer_query, $create_customer_variables, get_option('holaplex_api_key'));
+				
+				// save customer_id to user meta
+				$current_user = get_current_user_id();
+				$customer_id = $response['data']['createCustomer']['customer']['id'];
+
+				update_user_meta($current_user, 'holaplex_customer_id', $customer_id);
+				
+				$create_wallet_query = <<<'EOT'
+				mutation CreateCustomerWallet($input: CreateCustomerWalletInput!) {
+					createCustomerWallet(input: $input) {
+						wallet {
+							address
+						}
+					}
+				}
+				EOT;
+		
+				$create_wallet_variables = [
+					'input' => [
+						'customer' => $customer_id,
+					],
+				];
+
+				$core = new Holaplex_Core();
+				$response = $core->send_graphql_request($create_wallet_query, $create_wallet_variables, get_option('holaplex_api_key'));
+				
+
+				// Example response
+				$response = array('success' => true);
+				
+				wp_send_json($response);
+		}
+		add_action('wp_ajax_create_customer_wallet', 'create_customer_wallet_callback');
+		add_action('wp_ajax_nopriv_create_customer_wallet', 'create_customer_wallet_callback');
+	
+	}
 
 }

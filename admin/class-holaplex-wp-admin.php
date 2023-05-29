@@ -171,59 +171,7 @@ class Holaplex_Wp_Admin
 	}
 
 
-	private function send_graphql_request($query, $variables = [])
-	{
-		$api_url = 'https://api.holaplex.com/graphql';  // API endpoint URL
 
-		$headers = [
-			'Content-Type: application/json',
-			'Accept: application/json',
-			'Authorization: '. get_option('holaplex_api_key'),
-			'Accept-Encoding: gzip, deflate, br',
-			'Connection: keep-alive',
-			'DNT: 1',
-			'Origin: file://'
-		];
-
-		$data = [
-			'query' => $query,
-			'variables' => $variables,
-		];
-
-		$curl = curl_init($api_url);
-		curl_setopt($curl, CURLOPT_POST, true);
-		curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($data));
-		curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-
-		$response = curl_exec($curl);
-		$status_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-
-		if (curl_errno($curl)) {
-			$error_message = curl_error($curl);
-			// Handle the error here
-			return null;
-		}
-
-		curl_close($curl);
-		
-		$decoded_response = gzdecode($response);
-		$json_response = json_decode($decoded_response, true);
-
-		if ($status_code === 200) {
-			$decoded_response = gzdecode($response);
-			$json_response = json_decode($decoded_response, true);
-			// Handle the successful response here
-			return $json_response;
-		} elseif ($status_code === 401) {
-			// Handle unauthorized access here
-			return null;
-		} else {
-			// Handle other status codes here
-			$decoded_response = gzdecode($response);
-			return json_decode($decoded_response, true);
-		}
-	}
 
 	public function register_ajax_route () {
 
@@ -261,8 +209,8 @@ class Holaplex_Wp_Admin
 			'id' => $id,
 		];
 
-		// var_dump('response');
-		$response = $this->send_graphql_request($query, $variables);
+		$core = new Holaplex_Core();
+		$response = $core->send_graphql_request($query, $variables, get_option('holaplex_api_key'));
 
 		if ($response) {
 			$this->holaplex_status = '✅ connected';
@@ -338,6 +286,19 @@ class Holaplex_Wp_Admin
 								<td>
 									<input type="text" name="holaplex_api_key" value="<?php echo esc_attr(get_option('holaplex_api_key')); ?>">
 									<p class="description"><?php _e('Enter the API Token', 'holaplex-wp'); ?></p>
+								</td>
+							</tr>
+							<tr valign="top">
+								<th scope="row"><?php _e('Project', 'holaplex-wp'); ?></th>
+								<td>
+									<select value="<?php echo esc_attr(get_option('holaplex_project')); ?>" name="holaplex_project">
+										<?php
+											foreach ($holaplex_projects as $project) {
+												echo '<option value="' . esc_attr($project['id']) . '">' . esc_html($project['name']) . '</option>';
+											}
+										?>
+									</select>
+									<p class="description"><?php _e('Select the project', 'holaplex-wp'); ?></p>
 								</td>
 							</tr>
 						</tbody>
