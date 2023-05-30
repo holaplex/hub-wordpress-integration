@@ -8,8 +8,43 @@ jQuery(document).ready(function($) {
               action: 'create_customer_wallet'
           },
           success: function(response) {
-              // Handle the successful AJAX response
-              console.log(response);
+            location.reload()
+          },
+          error: function(xhr, status, error) {
+              // Handle AJAX error
+              console.log(error);
+          }
+      });
+  });
+
+  $('#remove-customer-button').on('click', function(e) {
+      e.preventDefault();
+      $.ajax({
+          url: holaplex_ajax.ajax_url,
+          type: 'POST',
+          data: {
+              action: 'remove_customer_wallet'
+          },
+          success: function(response) {
+            location.reload()
+          },
+          error: function(xhr, status, error) {
+              // Handle AJAX error
+              console.log(error);
+          }
+      });
+  });
+
+  $('#create-wallet-button').on('click', function(e) {
+      e.preventDefault();
+      $.ajax({
+          url: holaplex_ajax.ajax_url,
+          type: 'POST',
+          data: {
+              action: 'create_new_wallet'
+          },
+          success: function(response) {
+              location.reload()
           },
           error: function(xhr, status, error) {
               // Handle AJAX error

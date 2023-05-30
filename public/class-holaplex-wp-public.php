@@ -54,6 +54,8 @@ class Holaplex_Wp_Public {
 
 		$this->init_display_holaplex_customer_details_on_profile();
 		$this->init_create_customer_wallet_callback();
+		$this->init_create_new_wallet_callback();
+		$this->init_remove_customer_wallet_callback();
 
 	}
 
@@ -110,6 +112,35 @@ class Holaplex_Wp_Public {
 		function holaplex_customer_details_shortcode($atts) {
 			$current_user = wp_get_current_user();
 			$holaplex_customer_id = get_user_meta($current_user->ID, 'holaplex_customer_id', true);
+
+			$project_id = get_option('holaplex_project');
+			$holaplex_api_key = get_option('holaplex_api_key');
+
+			$query = <<<'EOT'
+			query getCustomerWallet($project_id: UUID!, $customer_id: UUID!) {
+				project(id: $project_id) {
+					name
+					customer(id: $customer_id) {
+						addresses
+					}
+				}
+			}
+			EOT;
+	
+			$variables = [
+				'customer_id' =>  $holaplex_customer_id,
+				'project_id' => $project_id
+			];
+
+			$core = new Holaplex_Core();
+			$response = $core->send_graphql_request($query, $variables, $holaplex_api_key);
+			if (isset($response['data']['project']['customer']['addresses']) && !empty($response['data']['project']['customer']['addresses'])) {
+				$customer_wallet = $response['data']['project']['customer']['addresses'][0];
+			} else {
+				$customer_wallet = '';
+			}
+
+
 			
 			if (!empty($holaplex_customer_id)) {
 		?>
@@ -117,31 +148,36 @@ class Holaplex_Wp_Public {
 			<div class="holaplex-app">
 				<div class="holaplex-app__header">
 					<div class="holaplex-app__header__title">
-						<h3><?php echo esc_html(__('Holaplex Customer Details', 'holaplex-wp')); ?></h3>
+						<h4><?php echo esc_html(__('Holaplex Customer Details', 'holaplex-wp')); ?></h3>
+						<p>Your wallet is connected to your account. This will make it easy for you to mint drops.</p>
 					</div>
 				</div>
 				<div class="holaplex-app__body">
 					<div class="holaplex-app__body__content">
-						<div class="holaplex-app__body__content__section">
-							<div class="holaplex-app__body__content__section__title">
-								<h4><?php echo esc_html(__('Customer ID', 'holaplex-wp')); ?></h4>
-							</div>
-							<div class="holaplex-app__body__content__section__content">
-								<p><?php echo esc_html(substr($holaplex_customer_id, -6)); ?></p>
-							</div>
-						</div>
-						<div class="holaplex-app__body__content__section">
-							<div class="holaplex-app__body__content__section__title">
-								<h4><?php echo esc_html(__('Wallet Address', 'holaplex-wp')); ?></h4>
-							</div>
-							<div class="holaplex-app__body__content__section__content">
-								<p><?php echo esc_html(get_user_meta($current_user->ID, 'holaplex_wallet_address', true)); ?></p>
-							</div>
-						</div>
+						<ul class="responsive-table">
+							<li class="table-row">
+								<div class="col-2"><?php echo esc_html(__('Customer ID', 'holaplex-wp')); ?></div>
+								<div class="col-3">...<?php echo esc_html(substr($holaplex_customer_id, -8)); ?></div>
+								<div class="col-1">
+									<button id="remove-customer-button" class="btn remove-btn" >Delete</button>
+								</div>
+							</li>
+							<li class="table-row">
+								<div class="col-2"><?php echo esc_html(__('Wallet Address', 'holaplex-wp')); ?></div>
+								<div class="col-3">...<?php echo esc_html(substr($customer_wallet, -8)); ?></div>
+								<div class="col-1">
+									<?php 
+										if ($customer_wallet === '' ){  ?>
+											<button id="create-wallet-button" class="btn add-btn" >Create Wallet</button>
+									<?php }  ?>
+								</div>
+							</li>
+						</ul>
+
 					</div>
 				</div>
 			</div>
-
+			
 		<?php
 
 			} else {
@@ -150,14 +186,15 @@ class Holaplex_Wp_Public {
 			<div class="holaplex-app">
 				<div class="holaplex-app__header">
 					<div class="holaplex-app__header__title">
-						<h3><?php echo esc_html(__('Holaplex Customer Details', 'holaplex-wp')); ?></h3>
+						<h4><?php echo esc_html(__('Holaplex Customer Details', 'holaplex-wp')); ?></h4>
+						<p>Create a new wallet linked to your account. This will make it easy for you to mint drops.</p>
 					</div>
 				</div>
 				<div class="holaplex-app__body">
 					<div class="holaplex-app__body__content">
 						<div class="holaplex-app__body__content__section">
 							<div class="holaplex-app__body__content__section__content">
-								<p><button id="create-customer-button"><?php echo esc_html(__('Create Customer and Wallet', 'holaplex-wp')); ?></button></p>
+								<p><button id="create-customer-button" class="btn add-btn btn-lg btn-block"><?php echo esc_html(__('Create Customer and Wallet', 'holaplex-wp')); ?></button></p>
 							</div>
 						</div>
 					</div>
@@ -171,7 +208,8 @@ class Holaplex_Wp_Public {
 		add_action('woocommerce_edit_account_form', 'holaplex_customer_details_shortcode');	
 	}
 
-	public function init_create_customer_wallet_callback() {
+	public function init_create_customer_wallet_callback() 
+	{
 			function create_customer_wallet_callback() {
 				// Call your create_customer_wallet function here
 				$create_customer_query = <<<'EOT'
@@ -211,6 +249,7 @@ class Holaplex_Wp_Public {
 				$create_wallet_variables = [
 					'input' => [
 						'customer' => $customer_id,
+						"assetType" => "SOL"
 					],
 				];
 
@@ -225,6 +264,64 @@ class Holaplex_Wp_Public {
 		}
 		add_action('wp_ajax_create_customer_wallet', 'create_customer_wallet_callback');
 		add_action('wp_ajax_nopriv_create_customer_wallet', 'create_customer_wallet_callback');
+	
+	}
+
+	public function init_create_new_wallet_callback() 
+	{
+			function create_new_wallet_callback() {
+
+				
+				$current_user = wp_get_current_user();
+				$holaplex_customer_id = get_user_meta($current_user->ID, 'holaplex_customer_id', true);
+
+				
+				$create_wallet_query = <<<'EOT'
+				mutation CreateCustomerWallet($input: CreateCustomerWalletInput!) {
+					createCustomerWallet(input: $input) {
+						wallet {
+							address
+						}
+					}
+				}
+				EOT;
+		
+				$create_wallet_variables = [
+					'input' => [
+						'customer' => $holaplex_customer_id,
+						"assetType" => "SOL"
+					],
+				];
+
+				$core = new Holaplex_Core();
+				$response = $core->send_graphql_request($create_wallet_query, $create_wallet_variables, get_option('holaplex_api_key'));
+
+				// Example response
+				$response = array('success' => true);
+				
+				wp_send_json($response);
+		}
+		add_action('wp_ajax_create_new_wallet', 'create_new_wallet_callback');
+		add_action('wp_ajax_nopriv_create_new_wallet', 'create_new_wallet_callback');
+	
+	}
+
+	public function init_remove_customer_wallet_callback() 
+	{
+			function remove_customer_wallet_callback() {
+
+				// save customer_id to user meta
+				$current_user = get_current_user_id();
+
+				update_user_meta($current_user, 'holaplex_customer_id', '');
+				
+				// Example response
+				$response = array('success' => true);
+				
+				wp_send_json($response);
+		}
+		add_action('wp_ajax_remove_customer_wallet', 'remove_customer_wallet_callback');
+		add_action('wp_ajax_nopriv_remove_customer_wallet', 'remove_customer_wallet_callback');
 	
 	}
 

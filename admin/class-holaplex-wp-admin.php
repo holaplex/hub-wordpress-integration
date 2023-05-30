@@ -254,7 +254,7 @@ class Holaplex_Wp_Admin
 				) );
 				//if products exist, show "synced", else show sync button
 				if (count($products) > 0) {
-					return '<span class="synced">Synced</span>';
+					return '<span class="synced">Synced</span><button class="" id="remove-sync-btn">Remove</button>';
 				} else {
 					return '<button id="sync-btn" data-drop-id="' . esc_attr($drop_id) . '">Sync</button>';
 				}

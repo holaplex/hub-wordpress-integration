@@ -2,3 +2,87 @@
  * All of the CSS for your public-facing functionality should be
  * included in this file.
  */
+
+
+.responsive-table li {
+  border-radius: 3px;
+  padding: 25px 30px;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 25px;
+}
+.responsive-table .table-header {
+  background-color: #f3f36d;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.responsive-table .table-row {
+  background-color: #ffffff;
+  box-shadow: 0px 0px 9px 0px rgba(0, 0, 0, 0.1);
+}
+.responsive-table .col-1 {
+  flex-basis: 10%;
+}
+.responsive-table .col-2 {
+  flex-basis: 40%;
+}
+.responsive-table .col-3 {
+  flex-basis: 25%;
+}
+.responsive-table .col-4 {
+  flex-basis: 25%;
+}
+@media all and (max-width: 767px) {
+  .responsive-table .table-header {
+    display: none;
+  }
+  .responsive-table li {
+    display: block;
+  }
+  .responsive-table .col {
+    flex-basis: 100%;
+  }
+  .responsive-table .col {
+    display: flex;
+    padding: 10px 0;
+  }
+  .responsive-table .col:before {
+    color: #6C7A89;
+    padding-right: 10px;
+    content: attr(data-label);
+    flex-basis: 50%;
+    text-align: right;
+  }
+}
+
+
+.btn {
+  padding: 2px 10px;
+  border-radius: 5px;
+}
+
+.add-btn {
+  background-color: #f3f36d;
+  border: solid 1px #7979795d;
+
+}
+
+.remove-btn {
+  background-color: rgb(250, 107, 107);
+  border: solid 1px rgb(230, 0, 0);
+}
+
+.btn-block {
+  width: 100%;
+  padding-top: 16px;
+  padding-bottom: 16px;
+  font-size: 16px;
+}
+
+.holaplex-app {
+  padding: 10px;
+  border: solid 1px grey;
+  border-radius: 5px;
+  margin: 10px 0;
+}
