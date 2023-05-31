@@ -116,7 +116,24 @@ class Holaplex_Wp_Public
 			$current_user = wp_get_current_user();
 			$holaplex_customer_id = get_user_meta($current_user->ID, 'holaplex_customer_id', true);
 
-			if (empty($holaplex_customer_id) || $holaplex_customer_id == '' || !$holaplex_customer_id) {
+			$project_id = get_option('holaplex_project');
+			$holaplex_api_key = get_option('holaplex_api_key');
+			$holaplex_org_id = get_option('holaplex_org_id');
+
+			if (
+				$project_id == '' || 
+				$holaplex_api_key == '' || 
+				$holaplex_org_id == '' 
+			) {
+				return;
+			}
+
+			if (
+				empty($holaplex_customer_id) || 
+				$holaplex_customer_id == '' || 
+				!$holaplex_customer_id 
+				) {
+
 		?>
 				<div class="holaplex-app">
 					<div class="holaplex-app__header">

@@ -62,6 +62,7 @@ class Holaplex_Wp_Admin
 		$this->init_ajax_sync_product_with_item();
 		$this->init_add_holaplex_customer_id_field();
 		$this->init_save_holaplex_customer_id_field();
+		$this->init_ajax_holaplex_disconnect();
 
 	}
 
@@ -171,6 +172,23 @@ class Holaplex_Wp_Admin
 	}
 
 
+	public function init_ajax_holaplex_disconnect () {
+		function holaplex_disconnect_callback() {
+
+			update_option('holaplex_api_key', '');
+			update_option('holaplex_project', '');
+			update_option('holaplex_org_id', '');				
+			// Example response
+			$response = array('success' => true);
+			
+			wp_send_json($response);
+		}
+		add_action('wp_ajax_holaplex_disconnect', 'holaplex_disconnect_callback');
+		add_action('wp_ajax_nopriv_holaplex_disconnect', 'holaplex_disconnect_callback');
+	
+	}
+
+
 
 
 	public function register_ajax_route () {
@@ -270,8 +288,6 @@ class Holaplex_Wp_Admin
 
 			}
 
-			var_dump(get_option('holaplex_project'));
-
 ?>
 			<div class="container holaplex-app">
 				<section>
@@ -281,8 +297,17 @@ class Holaplex_Wp_Admin
 							<tr valign="top">
 								<th scope="row"><?php _e('Connection Status', 'holaplex-wp'); ?></th>
 								<td>
-									<input readonly type="text" name="holaplex_connection_status" value="<?php echo esc_attr($holaplex_status); ?>">
-									<p class="description"><?php _e('Enter the connection status', 'holaplex-wp'); ?></p>
+									<div class="row">
+										<div class="col-6">
+												<?php echo esc_html($holaplex_status); ?>
+										</div>
+										<?php if ($holaplex_status == '✅ connected') : ?>
+											<div class="col-6">
+												<button id="holaplex-disconnect-btn" class="button button-secondary"><?php _e('Disconnect', 'holaplex-wp'); ?></button>
+											</div>
+											<?php endif; ?>
+
+									</div>
 								</td>
 							</tr>
 							<tr valign="top">
@@ -307,7 +332,7 @@ class Holaplex_Wp_Admin
 									<th scope="row"><?php _e('Project', 'holaplex-wp'); ?></th>
 									<td>
 										<select value="<?php echo esc_attr(get_option('holaplex_project')); ?>" name="holaplex_project">
-										<option disabled hidden value=""><?php _e('Select a project', 'holaplex-wp'); ?></option>
+										<option disabled value=""><?php _e('Select a project', 'holaplex-wp'); ?></option>
 											<?php
 												foreach ($holaplex_projects as $project) {
 													if ($project['id'] == get_option('holaplex_project') ) {

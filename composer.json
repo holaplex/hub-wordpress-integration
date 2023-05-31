@@ -21,5 +21,13 @@
       "main": "holaplex-wp.php",
       "namespace": "Holaplex\\HolaplexIntegration"
     }
+  },
+  "config": {
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    }
+  },
+  "require-dev": {
+    "automattic/vipwpcs": "^2.3"
   }
 }
