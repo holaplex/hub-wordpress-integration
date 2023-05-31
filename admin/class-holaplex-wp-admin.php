@@ -232,7 +232,6 @@ class Holaplex_Wp_Admin
 
 	public function add_holaplex_menu()
 	{
-		$this->login_to_holaplex();
 
 		add_filter('woocommerce_settings_tabs_array', 'holaplex_add_settings_tab', 50);
 
@@ -271,6 +270,8 @@ class Holaplex_Wp_Admin
 
 			}
 
+			var_dump(get_option('holaplex_project'));
+
 ?>
 			<div class="container holaplex-app">
 				<section>
@@ -306,9 +307,14 @@ class Holaplex_Wp_Admin
 									<th scope="row"><?php _e('Project', 'holaplex-wp'); ?></th>
 									<td>
 										<select value="<?php echo esc_attr(get_option('holaplex_project')); ?>" name="holaplex_project">
+										<option disabled hidden value=""><?php _e('Select a project', 'holaplex-wp'); ?></option>
 											<?php
 												foreach ($holaplex_projects as $project) {
-													echo '<option value="' . esc_attr($project['id']) . '">' . esc_html($project['name']) . '</option>';
+													if ($project['id'] == get_option('holaplex_project') ) {
+														echo '<option value="' . esc_attr($project['id']) . '" selected  >' . esc_html($project['name']) . '</option>';
+													} else {
+														echo '<option value="' . esc_attr($project['id']) . '"   >' . esc_html($project['name']) . '</option>';
+													}
 												}
 											?>
 										</select>
@@ -384,7 +390,6 @@ class Holaplex_Wp_Admin
 			$org_id = isset($_POST['holaplex_org_id']) ? sanitize_text_field($_POST['holaplex_org_id']) : '';
 			$project = isset($_POST['holaplex_project']) ? sanitize_text_field($_POST['holaplex_project']) : '';
 
-			update_option('holaplex_connection_status', $connection_status);
 			update_option('holaplex_api_key', $api_key);
 			update_option('holaplex_project', $project);
 			update_option('holaplex_org_id', $org_id);
