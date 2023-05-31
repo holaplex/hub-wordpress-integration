@@ -8,6 +8,13 @@ class Holaplex_Core
 
   public function send_graphql_request($query, $variables = [], $holaplex_api_key)
   {
+    function auth_admin_notice__error() {
+      $class = 'notice notice-error';
+      $message = __( 'Authentication error. Check Organization / API Token values.', 'sample-text-domain' );
+    
+      printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) ); 
+    }
+
     $api_url = 'https://api.holaplex.com/graphql';  // API endpoint URL
 
     $headers = [
@@ -51,6 +58,8 @@ class Holaplex_Core
     } else {
       // Error response
       // Handle the error
+
+      add_action( 'admin_notices', 'auth_admin_notice__error' );
       return false;
     }
 

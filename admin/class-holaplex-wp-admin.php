@@ -198,6 +198,12 @@ class Holaplex_Wp_Admin
 	private function login_to_holaplex()
 	{
 		$id = get_option('holaplex_org_id');
+		$holaplex_api_key = get_option('holaplex_api_key');
+
+		if (!$id || !$holaplex_api_key || empty($id) || empty($holaplex_api_key)) {
+			return false;
+		}
+
 		$query = <<<'EOT'
 		query getOrg($id: UUID!) {
 			organization(id: $id) {
@@ -237,7 +243,7 @@ class Holaplex_Wp_Admin
 		];
 
 		$core = new Holaplex_Core();
-		$response = $core->send_graphql_request($query, $variables, get_option('holaplex_api_key'));
+		$response = $core->send_graphql_request($query, $variables, $holaplex_api_key);
 
 		if ($response) {
 			$this->holaplex_status = '✅ connected';
