@@ -388,6 +388,9 @@ class Holaplex_Wp_Admin
 			update_option('holaplex_api_key', $api_key);
 			update_option('holaplex_project', $project);
 			update_option('holaplex_org_id', $org_id);
+
+			header("Refresh:0");
+
 		}
 	}
 }
