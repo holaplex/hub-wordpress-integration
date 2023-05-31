@@ -57,8 +57,8 @@ class Holaplex_Wp_Admin
 
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
-		$this->add_holaplex_menu();
 		$this->login_to_holaplex();
+		$this->add_holaplex_menu();
 		$this->init_ajax_sync_product_with_item();
 		$this->init_add_holaplex_customer_id_field();
 		$this->init_save_holaplex_customer_id_field();
@@ -196,7 +196,16 @@ class Holaplex_Wp_Admin
 						createdAt
 						shutdownAt
 						collection {
+							id
 							supply
+							totalMints
+							metadataJson {
+								id
+								name
+								image
+								description
+								symbol
+							}
 						}
 						status
 					}
@@ -223,12 +232,13 @@ class Holaplex_Wp_Admin
 
 	public function add_holaplex_menu()
 	{
+		$this->login_to_holaplex();
 
 		add_filter('woocommerce_settings_tabs_array', 'holaplex_add_settings_tab', 50);
 
 		function holaplex_add_settings_tab($tabs)
 		{
-			$tabs['holaplex_settings'] = __('Holaplex Hub', 'holaplex-wp');
+			$tabs['holaplex_settings'] = __('Holapblex Hub', 'holaplex-wp');
 			return $tabs;
 		}
 
@@ -288,19 +298,26 @@ class Holaplex_Wp_Admin
 									<p class="description"><?php _e('Enter the API Token', 'holaplex-wp'); ?></p>
 								</td>
 							</tr>
-							<tr valign="top">
-								<th scope="row"><?php _e('Project', 'holaplex-wp'); ?></th>
-								<td>
-									<select value="<?php echo esc_attr(get_option('holaplex_project')); ?>" name="holaplex_project">
-										<?php
-											foreach ($holaplex_projects as $project) {
-												echo '<option value="' . esc_attr($project['id']) . '">' . esc_html($project['name']) . '</option>';
-											}
-										?>
-									</select>
-									<p class="description"><?php _e('Select the project', 'holaplex-wp'); ?></p>
-								</td>
-							</tr>
+
+							<?php
+								if (!empty($holaplex_projects)) {
+							?>
+								<tr valign="top">
+									<th scope="row"><?php _e('Project', 'holaplex-wp'); ?></th>
+									<td>
+										<select value="<?php echo esc_attr(get_option('holaplex_project')); ?>" name="holaplex_project">
+											<?php
+												foreach ($holaplex_projects as $project) {
+													echo '<option value="' . esc_attr($project['id']) . '">' . esc_html($project['name']) . '</option>';
+												}
+											?>
+										</select>
+										<p class="description"><?php _e('Select the project', 'holaplex-wp'); ?></p>
+									</td>
+								</tr>
+							<?php
+								}
+							?>
 						</tbody>
 					</table>
 				</section>
@@ -338,12 +355,13 @@ class Holaplex_Wp_Admin
 								foreach ($project['drops'] as $drop) {
 									$project_name = $project['name'];
 									$drop_id = substr($drop['id'], -6);
-									$collection_supply = $drop['collection']['supply'];
+									$drop_name = $drop['collection']['metadataJson']['name'];
+									$collection_supply = $drop['collection']['supply'] - $drop['collection']['totalMints'];
 									$drop_status = $drop['status'];
 									
 									echo '<li class="table-row">';
 									echo '<div class="col-1">' . esc_html($project_name) . '</div>';
-									echo '<div class="col-2">' . esc_html($drop_id) . '</div>';
+									echo '<div class="col-2">' . esc_html($drop_name) . '</div>';
 									echo '<div class="col-1">' . esc_html($collection_supply) . '</div>';
 									echo '<div class="col-1">' . esc_html($drop_status) . '</div>';
 									// echo '<div class="col-1">' . esc_html($drop_status) . '</div>';

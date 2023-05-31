@@ -22,7 +22,8 @@
 
 .holaplex-app section:nth-child(2){
   width: 50%;
-  margin-right: 56px;
+  margin-right: 26px;
+  margin-left: 26px;
 }
 .help-mesg {
   font-size: 15px;
@@ -79,4 +80,12 @@
     flex-basis: 50%;
     text-align: right;
   }
+}
+
+
+.form-table input,
+.form-table select 
+{
+  width: 100% !important;
+  max-width: 400px;
 }
