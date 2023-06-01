@@ -4,27 +4,7 @@
  */
 
 
-.container {
 
-}
-
-.holaplex-app {
-  display: flex;
-}
-
-.holaplex-app section{
-  flex-grow: 1;
-}
-
-.holaplex-app section:first-child{
-  width: 45%;
-}
-
-.holaplex-app section:nth-child(2){
-  width: 50%;
-  margin-right: 26px;
-  margin-left: 26px;
-}
 .help-mesg {
   font-size: 15px;
   line-height: 2;
