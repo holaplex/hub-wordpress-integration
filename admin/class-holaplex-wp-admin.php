@@ -262,7 +262,7 @@ class Holaplex_Wp_Admin
 
 		function holaplex_add_settings_tab($tabs)
 		{
-			$tabs['holaplex_settings'] = __('Holapblex Hub', 'holaplex-wp');
+			$tabs['holaplex_settings'] = __('Holaplex Hub', 'holaplex-wp');
 			return $tabs;
 		}
 
@@ -297,7 +297,7 @@ class Holaplex_Wp_Admin
 
 ?>
 		<div class="bootstrap-wrapper">
-			<div class="container holaplex-app">
+			<div class="container-fluid holaplex-app">
 				<div class="row">
 					<section class="col-md-12 col-sm-12 col-lg-6">
 						<h2><?php _e('Holaplex Settings', 'holaplex-wp'); ?></h2>
@@ -421,7 +421,6 @@ class Holaplex_Wp_Admin
 
 		function holaplex_woo_save_settings()
 		{
-			$connection_status = isset($_POST['holaplex_connection_status']) ? sanitize_text_field($_POST['holaplex_connection_status']) : '';
 			$api_key = isset($_POST['holaplex_api_key']) ? sanitize_text_field($_POST['holaplex_api_key']) : '';
 			$org_id = isset($_POST['holaplex_org_id']) ? sanitize_text_field($_POST['holaplex_org_id']) : '';
 			$project = isset($_POST['holaplex_project']) ? sanitize_text_field($_POST['holaplex_project']) : '';

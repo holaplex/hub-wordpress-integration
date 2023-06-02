@@ -10,7 +10,7 @@ class Holaplex_Core
   {
     function auth_admin_notice__error() {
       $class = 'notice notice-error';
-      $message = __( 'Authentication error. Check Organization / API Token values.', 'sample-text-domain' );
+      $message = __( 'There’s a problem with the Organization ID or API Token that you’ve entered. Please update these values.', 'holaplex-wp' );
     
       printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) ); 
     }
