@@ -1,6 +1,9 @@
 jQuery(document).ready(function($) {
   $('#create-customer-button').on('click', function(e) {
       e.preventDefault();
+      // change text to "Creating..."
+      $(e.target).text('Creating...');
+      e.target.disabled = true;
       $.ajax({
           url: holaplex_ajax.ajax_url,
           type: 'POST',
@@ -8,6 +11,8 @@ jQuery(document).ready(function($) {
               action: 'create_customer_wallet'
           },
           success: function(response) {
+            $(e.target).text('Complete...');
+            e.target.disabled = false;
             location.reload()
           },
           error: function(xhr, status, error) {

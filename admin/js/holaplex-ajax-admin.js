@@ -1,4 +1,32 @@
 jQuery(document).ready(function ($) {
+    $('#mainform').on('submit', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // get #mainform form data into json
+        const data = {};
+        $.each($(this).serializeArray(), function (i, field) {
+            data[field.name] = field.value || '';
+        });       
+
+        $.ajax({
+            url: holaplex_wp_ajax.ajax_url,
+            type: 'POST',
+            data: {
+                action: 'holaplex_connect',
+                ...data
+            },
+            success: function (response) {
+                // Handle the successful AJAX response
+                console.log(response);
+                location.reload();
+            },
+            error: function (xhr, status, error) {
+                // Handle AJAX error
+                console.log(error);
+            }
+        });
+    });
     $('#holaplex-disconnect-btn').on('click', function (e) {
         e.preventDefault();
         $.ajax({

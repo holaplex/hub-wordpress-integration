@@ -63,6 +63,7 @@ class Holaplex_Wp_Admin
 		$this->init_add_holaplex_customer_id_field();
 		$this->init_save_holaplex_customer_id_field();
 		$this->init_ajax_holaplex_disconnect();
+		$this->init_ajax_holaplex_connect();
 
 	}
 
@@ -173,7 +174,28 @@ class Holaplex_Wp_Admin
 	}
 
 
-	public function init_ajax_holaplex_disconnect () {
+	public function init_ajax_holaplex_connect () {
+		function holaplex_connect_callback() {
+
+			$api_key = isset($_POST['holaplex_api_key']) ? sanitize_text_field($_POST['holaplex_api_key']) : '';
+			$org_id = isset($_POST['holaplex_org_id']) ? sanitize_text_field($_POST['holaplex_org_id']) : '';
+			$project = isset($_POST['holaplex_project']) ? sanitize_text_field($_POST['holaplex_project']) : '';
+
+			update_option('holaplex_api_key', $api_key);
+			update_option('holaplex_project', $project);
+			update_option('holaplex_org_id', $org_id);		
+			// Example response
+			$response = array('success' => true);
+			
+			wp_send_json($response);
+		}
+		add_action('wp_ajax_holaplex_connect', 'holaplex_connect_callback');
+		add_action('wp_ajax_nopriv_holaplex_connect', 'holaplex_connect_callback');
+	
+	}
+
+	public function init_ajax_holaplex_disconnect () 
+	{
 		function holaplex_disconnect_callback() {
 
 			update_option('holaplex_api_key', '');
