@@ -340,8 +340,8 @@ class Holaplex_Wp_Admin
 									<tr valign="top">
 										<th scope="row"><?php _e('Project', 'holaplex-wp'); ?></th>
 										<td>
-											<select value="<?php echo esc_attr(get_option('holaplex_project')); ?>" name="holaplex_project">
-											<option disabled value=""><?php _e('Select a project', 'holaplex-wp'); ?></option>
+											<select name="holaplex_project">
+											<option value=""><?php _e('Select a project', 'holaplex-wp'); ?></option>
 												<?php
 													foreach ($holaplex_projects as $project) {
 														if ($project['id'] == get_option('holaplex_project') ) {
