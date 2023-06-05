@@ -8,19 +8,14 @@ class Holaplex_Core
 
   public function send_graphql_request($query, $variables = [], $holaplex_api_key)
   {
-    function auth_admin_notice__error() {
-      $class = 'notice notice-error';
-      $message = __( 'There’s a problem with the Organization ID or API Token that you’ve entered. Please update these values.', 'holaplex-wp' );
-    
-      printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) ); 
-    }
+
 
     $api_url = 'https://api.holaplex.com/graphql';  // API endpoint URL
 
     $headers = [
       'Content-Type' => 'application/json',
       'Accept' => 'application/json',
-      'Authorization' => '' . $holaplex_api_key, // get_option('holaplex_api_key'),
+      'Authorization' => '' . $holaplex_api_key, 
       'Accept-Encoding' => 'gzip, deflate, br',
       'Connection' => 'keep-alive',
       'DNT' => '1',
@@ -58,9 +53,15 @@ class Holaplex_Core
     } else {
       // Error response
       // Handle the error
-
-      add_action( 'admin_notices', 'auth_admin_notice__error' );
-      return false;
+      if ( is_admin() ) {
+        add_action( 'admin_notices', function () {
+          $class = 'notice notice-error';
+          $message = __( 'There’s a problem with the Organization ID or API Token that you’ve entered. Please update these values.', 'holaplex-wp' );
+          
+          printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) ); 
+        } );
+      }
+        return false;
     }
 
   }
