@@ -54,7 +54,7 @@ class Holaplex_Wp_Public
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
 
-		$this->init_display_holaplex_customer_details_on_profile();
+		// $this->init_display_holaplex_customer_details_on_profile();
 		$this->init_create_customer_wallet_callback();
 		$this->init_create_new_wallet_callback();
 		$this->init_remove_customer_wallet_callback();

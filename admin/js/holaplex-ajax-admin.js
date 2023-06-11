@@ -1,4 +1,14 @@
 jQuery(document).ready(function ($) {
+
+    $('.holaplex-tablinks').on('click', function (e) {
+        e.preventDefault();
+        $('.holaplex-tablinks').removeClass('active');
+        $(this).addClass('active');
+        $('.holaplex-tab-content').removeClass('active');
+        $(this.dataset.tab).addClass('active');
+    })
+
+
     $('#mainform').on('submit', function (e) {
         e.preventDefault();
         e.stopPropagation();

@@ -69,3 +69,52 @@
   width: 100% !important;
   max-width: 400px;
 }
+
+
+.holaplex-app .holaplex-tab-content {
+  display: none;
+}
+.holaplex-app .holaplex-tab-content.active {
+  display: block;
+}
+
+.holaplex-app .holaplex-tabs {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 15px;
+}
+
+
+
+.holaplex-app .holaplex-tablinks.active {
+  background: #f3f36d;
+  color: #000;
+  border-bottom: 1px solid #ccc;
+}
+
+/* hide button in .holaplex-app except button-primary woocommerce-save-button main-btn */
+.bootstrap-wrapper  button.button-primary.woocommerce-save-button[type="submit"]:not(.main-btn) {
+  display: none;
+}
+.bootstrap-wrapper  button.show-btn {
+  display: block !important;
+}
+
+.holaplex-app button.holaplex-tablinks {
+  display: block !important;
+  background-color: transparent;
+  border: none;
+  font-size: 1rem;
+  padding: 7px 10px;
+  border: 1px solid #ccc;
+  border-bottom: none;
+  cursor: pointer;
+  background: #fff;
+  color: #000;
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.03em;
+  border-radius: 3px 3px 0 0;
+}
+

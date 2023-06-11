@@ -325,7 +325,7 @@ class Holaplex_Wp_Admin
 						<!-- two tabs -->
 						<div class="col-md-12 col-sm-12 col-lg-6">
 							<div class="holaplex-tabs">
-								<button class="holaplex-tablinks" data-tab="#holaplex-setup">Setup / Config</button>
+								<button class="holaplex-tablinks active" data-tab="#holaplex-setup">Setup / Config</button>
 								<button class="holaplex-tablinks" data-tab="#holaplex-drops">Import Drops</button>
 							</div>
 						</div>
@@ -386,12 +386,12 @@ class Holaplex_Wp_Admin
 							If you do not already have a Holaplex Hub account, you can create one at <a target='_blank' href='https://hub.holaplex.com/'>https://hub.holaplex.com/</a><br/>
 							
 							</p>";
-										return;
 									}
 									?>
 								</div>
 							</div>
 						</section>
+
 						<section id="holaplex-drops" class="col-md-12 col-sm-12 col-lg-12 holaplex-tab-content">
 							<?php
 							// if no projects, show a message and return
