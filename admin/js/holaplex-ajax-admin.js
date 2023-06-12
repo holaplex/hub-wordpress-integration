@@ -12,6 +12,9 @@ jQuery(document).ready(function ($) {
     $('#mainform').on('submit', function (e) {
         e.preventDefault();
         e.stopPropagation();
+        window.onbeforeunload = null;
+        $(window).off('beforeunload');
+
 
         // get #mainform form data into json
         const data = {};

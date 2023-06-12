@@ -314,7 +314,7 @@ class Holaplex_Wp_Admin
 				if (count($products) > 0) {
 					return '<span class="synced">Synced</span><button class="" id="remove-sync-btn">Remove</button>';
 				} else {
-					return '<button id="sync-btn" data-drop-id="' . esc_attr($drop_id) . '">Sync</button>';
+					return '<button id="sync-btn" data-drop-id="' . esc_attr($drop_id) . '">Import</button>';
 				}
 			}
 
@@ -374,20 +374,16 @@ class Holaplex_Wp_Admin
 									</div>
 								</div>
 								<div class="col-md-12 col-lg-6">
-									<?php
-									// if no projects, show a message and return
-									if (empty($holaplex_projects)) {
-										echo "<h2 class='help-title'>" . esc_html(__('Setup Help', 'holaplex-wp')) . "</h2>";
-										echo "<p class='description help-mesg'>
-							To connect to Holaplex Hub, enter an API token and associated Organization ID below. <br/>
-							An API token can be generated on the Credentials tab of your Organization's page on Hub: <a target='_blank' href='https://hub.holaplex.com/credentials'>https://hub.holaplex.com/credentials</a>. <br/>
-							You can find your Organization ID by clicking the menu button in the upper left corner, next to your organization's name. <br/>
-							For more info, please see <a  target='_blank' href='https://docs.holaplex.com/category/guides/woocommerce-plugin' > https://docs.holaplex.com/category/guides/woocommerce-plugin</a><br/>
-							If you do not already have a Holaplex Hub account, you can create one at <a target='_blank' href='https://hub.holaplex.com/'>https://hub.holaplex.com/</a><br/>
-							
-							</p>";
-									}
-									?>
+									<h2 class='help-title'><?php echo esc_html(__('Setup Help', 'holaplex-wp')); ?></h2>
+									<p class='description help-mesg'>
+										To connect to Holaplex Hub, enter an API token and associated Organization ID below. <br />
+										An API token can be generated on the Credentials tab of your Organization's page on Hub: <a target='_blank' href='https://hub.holaplex.com/credentials'>https://hub.holaplex.com/credentials</a>. <br />
+										You can find your Organization ID by clicking the menu button in the upper left corner, next to your organization's name. <br />
+										For more info, please see <a target='_blank' href='https://docs.holaplex.com/category/guides/woocommerce-plugin'> https://docs.holaplex.com/category/guides/woocommerce-plugin</a><br />
+										If you do not already have a Holaplex Hub account, you can create one at <a target='_blank' href='https://hub.holaplex.com/'>https://hub.holaplex.com/</a><br />
+
+									</p>
+
 								</div>
 							</div>
 						</section>
@@ -398,7 +394,7 @@ class Holaplex_Wp_Admin
 							if (empty($holaplex_projects)) {
 								echo "<h2 class='help-title'>" . esc_html(__('Import Drops Help', 'holaplex-wp')) . "</h2>";
 								echo "<p class='description help-mesg'>
-							Connect to Holaplex Hub to Import Drops, 
+								Connect to Holaplex Hub on the SETUP / CONFIG tab before you can import drops.
 							</p>";
 								return;
 							}
@@ -414,7 +410,7 @@ class Holaplex_Wp_Admin
 									<div class="col-2">Drop name</div>
 									<div class="col-1">Supply</div>
 									<div class="col-1">Status</div>
-									<div class="col-1">Sync</div>
+									<div class="col-1">Import</div>
 								</li>
 								<!-- loop through project drops -->
 								<?php foreach ($holaplex_projects as $project) {
