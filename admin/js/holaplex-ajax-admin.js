@@ -61,13 +61,21 @@ jQuery(document).ready(function ($) {
     });
     $('#sync-button').on('click', function () {
         const drop_id = this.dataset.dropId;
+        const dropName = this.dataset.dropName;
+        const dropDesc = this.dataset.dropDesc;
+        const dropImage = this.dataset.dropImage;
+        const nonce = this.dataset.wpNonce;
 
         $.ajax({
             url: your_plugin_ajax.ajax_url,
             type: 'POST',
             data: {
                 action: 'add_product_with_drop_id',
-                drop_id: drop_id
+                drop_id: drop_id,
+                _wpnonce: nonce,
+                drop_name: dropName,
+                drop_desc: dropDesc,
+                drop_image: dropImage
             },
             success: function (response) {
                 // Handle the successful AJAX response

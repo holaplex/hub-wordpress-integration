@@ -37,6 +37,11 @@ if ( ! defined( 'WPINC' ) ) {
  */
 define( 'PLUGIN_NAME_VERSION', '1.0.3' );
 
+
+define( 'HOLAPLEX_PLUGIN_PATH', plugin_dir_path( __FILE__ ) );
+define( 'HOLAPLEX_NONCE', 'holaplex_ajax_nonce' );
+
+
 /**
  * The code that runs during plugin activation.
  * This action is documented in includes/class-holaplex-wp-activator.php

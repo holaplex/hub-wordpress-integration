@@ -3,7 +3,7 @@ Contributors: k0d3d
 Tags: woocommerce, holaplex, nft, integration
 Requires at least: 5.0
 Tested up to: 5.8
-Stable tag: 1.0.0
+Stable tag: 1.0.3
 License: MIT License
 License URI: https://opensource.org/licenses/MIT
 
