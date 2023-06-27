@@ -118,3 +118,7 @@
   border-radius: 3px 3px 0 0;
 }
 
+.holaplex-app .header-actions {
+  display: flex;
+  justify-content: flex-end;
+}

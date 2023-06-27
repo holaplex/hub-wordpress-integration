@@ -67,49 +67,50 @@
     </section>
 
     <section id="holaplex-drops" class="col-md-12 col-sm-12 col-lg-12 holaplex-tab-content">
-      <?php
-      // if no projects, show a message and return
-      if (empty($holaplex_projects)) {
-        echo "<h2 class='help-title'>" . esc_html(__('Import Drops Help', 'holaplex-wp')) . "</h2>";
-        echo "<p class='description help-mesg'>
-								Connect to Holaplex Hub on the SETUP / CONFIG tab before you can import drops.
-							</p>";
-        return;
-      }
-      ?>
-      <h2><?php _e('Project Drops', 'holaplex-wp'); ?></h2>
-      <p class="description">
-        Creates a product for each drop in your Holaplex projects.
-      </p>
-
-      <ul class="responsive-table">
-        <li class="table-header">
-          <div class="col-1">Project</div>
-          <div class="col-2">Drop name</div>
-          <div class="col-1">Supply</div>
-          <div class="col-1">Status</div>
-          <div class="col-1">Import</div>
-        </li>
-        <!-- loop through project drops -->
-        <?php foreach ($holaplex_projects as $project) {
-          foreach ($project['drops'] as $drop) {
-            $project_name = $project['name'];
-            $drop_id = substr($drop['id'], -6);
-            $drop_name = $drop['collection']['metadataJson']['name'];
-            $collection_supply = $drop['collection']['supply'] - $drop['collection']['totalMints'];
-            $drop_status = $drop['status'];
-
-            echo '<li class="table-row">';
-            echo '<div class="col-1">' . esc_html($project_name) . '</div>';
-            echo '<div class="col-2">' . esc_html($drop_name) . '</div>';
-            echo '<div class="col-1">' . esc_html($collection_supply) . '</div>';
-            echo '<div class="col-1">' . esc_html($drop_status) . '</div>';
-            echo '<div class="col-1">' . showSyncActions($drop) . '</div>';
-            echo '</li>';
-          }
-        }
-        ?>
-      </ul>
+      <h2><?php echo esc_html(__('Drops', 'holaplex-wp')); ?></h2>
+      <div class="row">
+        <div class="col-md-6">
+          <h4 class="description">
+            Import your Holaplex Hub Drops as products to make them available to sell or claim through your store.
+          </h4>
+        </div>
+        <div class="col-md-2">
+          <div class="header-actions">
+            <button class="btn btn-primary align-self-right">Import</button>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-8">
+          <ul class="responsive-table">
+            <li class="table-header">
+              <div class="col-2">Name</div>
+              <div class="col-1">Supply</div>
+              <div class="col-1">Status</div>
+              <div class="col-1">Import</div>
+            </li>
+            <?php 
+  
+              // if $holaplex_products is not empty show the products, else show message
+              if (!empty($holaplex_products)) {
+                foreach ($holaplex_products as $product) {
+                  echo "<li class='table-row'>";
+                  echo "<div class='col-2'>" . esc_html($product['name']) . "</div>";
+                  echo "<div class='col-1'>" . esc_html($product['supply']) . "</div>";
+                  echo "<div class='col-1'>" . esc_html($product['status']) . "</div>";
+                  echo "<div class='col-1'><button class='btn btn-primary'>Import</button></div>";
+                  echo "</li>";
+                }
+              } else {
+                echo "<li class='table-row'>";
+                echo "<div class='col-12'><p class='description'>" . esc_html(__('No drops imported.', 'holaplex-wp')) . "</p></div>";
+                echo "</li>";
+              }
+  
+            ?>
+          </ul>
+        </div>
+      </div>
     </section>
   </div>
 </div>

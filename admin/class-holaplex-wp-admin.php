@@ -340,13 +340,29 @@ class Holaplex_Wp_Admin
 		add_action('woocommerce_settings_holaplex_settings', function () {
 			$holaplex_projects = $this->holaplex_projects;
 			$holaplex_status = $this->holaplex_status;
-			holaplex_woo_settings_page($holaplex_projects, $holaplex_status);
+
+			$project_drops = [];
+			foreach ($holaplex_projects as $project) {
+				foreach ($project['drops'] as $drop) {
+					$project_drops[$drop['id']] = $drop;
+				}
+			}
+			
+			// get all products with a drop_id
+			$holaplex_products = wc_get_products(array(
+				'limit' => -1,
+				'meta_key' => 'drop_id',
+				'meta_value' => '',
+				'meta_compare' => '!='
+			));
+
+			holaplex_woo_settings_page($holaplex_products, $holaplex_projects, $holaplex_status, $project_drops);
 		});
 
 		add_action('woocommerce_update_options_holaplex_settings', 'holaplex_woo_save_settings');
 
 
-		function holaplex_woo_settings_page($holaplex_projects, $holaplex_status)
+		function holaplex_woo_settings_page($holaplex_products, $holaplex_projects, $holaplex_status, $project_drops)
 		{
 
 			// check if there's an existing product with this dropid.
