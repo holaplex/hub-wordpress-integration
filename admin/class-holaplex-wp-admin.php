@@ -57,6 +57,7 @@ class Holaplex_Wp_Admin
 
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
+		$this->add_wc_products_drop_id_filter();
 		$this->login_to_holaplex();
 		$this->add_holaplex_menu();
 		$this->init_ajax_sync_product_with_item();
@@ -114,6 +115,36 @@ class Holaplex_Wp_Admin
 		wp_enqueue_script('holaplex-ajax-admin', plugin_dir_url(__FILE__) . 'js/holaplex-ajax-admin.js', array('jquery'), $this->version, false);
 
 		wp_localize_script('holaplex-ajax-admin', 'holaplex_wp_ajax', array('ajax_url' => admin_url('admin-ajax.php')));
+	}
+
+	public function add_wc_products_drop_id_filter()
+	{
+		function handle_custom_query_var($query, $query_vars)
+		{
+			if (!empty($query_vars['holaplex_drop_id'])) {
+
+				$query['meta_query'] = [
+					'relation' => 'OR',
+					[
+						'key' => 'holaplex_drop_id',
+						'value'   => array(''),
+						'compare' => 'NOT IN'
+					],
+					[
+						'key' => 'holaplex_drop_id',
+						'compare' => 'EXISTS'
+					],
+					[
+						'key' => 'holaplex_drop_id',
+						'value'   => '',
+						'compare' => '!='
+					],
+				];
+			}
+
+			return $query;
+		}
+		add_filter('woocommerce_product_data_store_cpt_get_products_query', 'handle_custom_query_var', 10, 2);
 	}
 
 
@@ -184,36 +215,33 @@ class Holaplex_Wp_Admin
 			update_post_meta($product_id, 'holaplex_drop_id', $drop_id);
 
 			// add drop_image to product thumbnail	
-			$upload_dir = wp_get_upload_dir();
-			$image_data = file_get_contents($drop_image);
-			$filename = basename($drop_image);
-			if (wp_mkdir_p($upload_dir['path'])) {
-				$file = $upload_dir['path'] . '/' . $filename;
-			} else {
-				$file = $upload_dir['basedir'] . '/' . $filename;
-			}
+			// $upload_dir = wp_get_upload_dir();
+			// $image_data = file_get_contents($drop_image);
+			// $filename = basename($drop_image);
+			// if (wp_mkdir_p($upload_dir['path'])) {
+			// 	$file = $upload_dir['path'] . '/' . $filename;
+			// } else {
+			// 	$file = $upload_dir['basedir'] . '/' . $filename;
+			// }
 
-			file_put_contents($file, $image_data);
+			// file_put_contents($file, $image_data);
 
-			$wp_filetype = wp_check_filetype($filename, null);
-			// save image to product thumbail
-			$attachment = array(
-				'post_mime_type' => $wp_filetype['type'],
-				'post_title' => sanitize_file_name($filename),
-				'post_content' => '',
-				'post_status' => 'inherit',
-				'post_parent' => $product_id
-			);
-			
-			// save attachement
-			$attach_id = wp_insert_attachment($attachment, $file, $product_id);
-			
-			// get product object
-			$product = wc_get_product($product_id);
+			// $wp_filetype = wp_check_filetype($filename, null);
+			// // save image to product thumbail
+			// $attachment = array(
+			// 	'post_mime_type' => $wp_filetype['type'],
+			// 	'post_title' => sanitize_file_name($filename),
+			// 	'post_content' => '',
+			// 	'post_status' => 'inherit',
+			// 	'post_parent' => $product_id
+			// );
+
+			// // save attachement
+			// $attach_id = wp_insert_attachment($attachment, $file, $product_id);
 
 
 			// Example response
-			$response = array('success' => true, 'product' => $product);
+			$response = array('success' => true, 'product' => $product_id);
 
 			wp_send_json($response);
 		}
@@ -347,14 +375,12 @@ class Holaplex_Wp_Admin
 					$project_drops[$drop['id']] = $drop;
 				}
 			}
-			
+
 			// get all products with a drop_id
-			$holaplex_products = wc_get_products(array(
-				'limit' => -1,
-				'meta_key' => 'drop_id',
-				'meta_value' => '',
-				'meta_compare' => '!='
+			$holaplex_products =  wc_get_products(array(
+				'holaplex_drop_id' => 'EXISTS'
 			));
+
 
 			holaplex_woo_settings_page($holaplex_products, $holaplex_projects, $holaplex_status, $project_drops);
 		});
@@ -381,20 +407,20 @@ class Holaplex_Wp_Admin
 					'numberposts' => 1
 				));
 
-				$nonce = wp_create_nonce( HOLAPLEX_NONCE );
+				$nonce = wp_create_nonce(HOLAPLEX_NONCE);
 				//if products exist, show "synced", else show import button
 				if (count($products) > 0) {
 					return '<span class="synced">Synced</span><button class="" id="remove-sync-btn">Remove</button>';
 				} else {
-					return '<button id="sync-btn" data-drop-image="'.esc_attr($drop_image).'" data-drop-name="'.esc_attr($drop_name).'" data-drop-desc="'.esc_attr($drop_description).'"  data-wp-nonce="'.esc_attr($nonce).'" data-drop-id="' . esc_attr($drop_id) . '">Import</button>';
+					return '<button id="sync-btn" data-drop-image="' . esc_attr($drop_image) . '" data-drop-name="' . esc_attr($drop_name) . '" data-drop-desc="' . esc_attr($drop_description) . '"  data-wp-nonce="' . esc_attr($nonce) . '" data-drop-id="' . esc_attr($drop_id) . '">Import</button>';
 				}
 			}
 
 		?>
 			<div class="bootstrap-wrapper">
-				<?php 
-					include_once(HOLAPLEX_PLUGIN_PATH . 'admin/partials/holaplex-wp-admin-container.php'); 
-					?>
+				<?php
+				include_once(HOLAPLEX_PLUGIN_PATH . 'admin/partials/holaplex-wp-admin-container.php');
+				?>
 				<div class="clear"></div>
 	<?php
 		}

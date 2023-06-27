@@ -8,7 +8,7 @@
       </div>
     </div>
   </div>
-  <div class="row">
+  <div class="row" style="height: 100%;">
     <section id="holaplex-setup" class="col-md-12 col-sm-12 col-lg-12 holaplex-tab-content active">
       <div class="row">
         <div class="col-lg-6">
@@ -76,7 +76,7 @@
         </div>
         <div class="col-md-2">
           <div class="header-actions">
-            <button class="btn btn-primary align-self-right">Import</button>
+            <a href="#drops-modal" class="btn btn-primary align-self-right">Import</a>
           </div>
         </div>
       </div>
@@ -95,10 +95,10 @@
               if (!empty($holaplex_products)) {
                 foreach ($holaplex_products as $product) {
                   echo "<li class='table-row'>";
-                  echo "<div class='col-2'>" . esc_html($product['name']) . "</div>";
-                  echo "<div class='col-1'>" . esc_html($product['supply']) . "</div>";
-                  echo "<div class='col-1'>" . esc_html($product['status']) . "</div>";
-                  echo "<div class='col-1'><button class='btn btn-primary'>Import</button></div>";
+                  echo "<div class='col-2'>" . esc_html($product->get_name()) . "</div>";
+                  echo "<div class='col-1'>" . '' . "</div>";
+                  echo "<div class='col-1'>" . '' . "</div>";
+                  echo "<div class='col-1'><button class='btn btn-primary'>Remove</button></div>";
                   echo "</li>";
                 }
               } else {
@@ -111,6 +111,7 @@
           </ul>
         </div>
       </div>
+      <?php include_once( HOLAPLEX_PLUGIN_PATH . 'admin/partials/holaplex-wp-admin-import-drops.php'); ?>
     </section>
   </div>
 </div>
