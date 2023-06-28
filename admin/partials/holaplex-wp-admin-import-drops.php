@@ -38,7 +38,7 @@
             echo '<div class="col-2">' . esc_html($drop_name) . '</div>';
             echo '<div class="col-1">' . esc_html($collection_supply) . '</div>';
             echo '<div class="col-1">' . esc_html($drop_status) . '</div>';
-            echo '<div class="col-1">' . showSyncActions($drop) . '</div>';
+            echo '<div class="col-1">' . showSyncActions($drop, $project['id']) . '</div>';
             echo '</li>';
           }
         }

@@ -59,12 +59,13 @@ jQuery(document).ready(function ($) {
             }
         });
     });
-    $('#sync-btn').on('click', function (e) {
+    $('.import-btn').on('click', function (e) {
         e.preventDefault();
         const drop_id = this.dataset.dropId;
         const dropName = this.dataset.dropName;
         const dropDesc = this.dataset.dropDesc;
         const dropImage = this.dataset.dropImage;
+        const projectId = this.dataset.projectId;
         const nonce = this.dataset.wpNonce;
 
         $.ajax({
@@ -76,7 +77,8 @@ jQuery(document).ready(function ($) {
                 _wpnonce: nonce,
                 drop_name: dropName,
                 drop_desc: dropDesc,
-                drop_image: dropImage
+                drop_image: dropImage,
+                project_id: projectId
             },
             success: function (response) {
                 // Handle the successful AJAX response

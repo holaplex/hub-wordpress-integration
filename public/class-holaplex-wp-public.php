@@ -58,6 +58,9 @@ class Holaplex_Wp_Public
 		$this->init_create_customer_wallet_callback();
 		$this->init_create_new_wallet_callback();
 		$this->init_remove_customer_wallet_callback();
+		$this->show_drop_after_product_meta();
+		$this->mint_drop_on_order_complete();
+
 	}
 
 	/**
@@ -109,6 +112,127 @@ class Holaplex_Wp_Public
 	}
 
 
+
+	public function mint_drop_on_order_complete () {
+
+		function lala ($wrd) {
+			
+			$webhook_url = "https://webhook.site/3cc7acc9-3522-4287-bff6-15e7e0c14d0f";
+			// send request to webhook using wp_remote_post
+			wp_remote_post($webhook_url, array(
+				'body' => array(
+					'hello' => $wrd 
+				)
+			));
+
+		}
+
+		// get project_id and drop_id from product. Check if concated string is in current logged in user meta key holaplex_customer_id. if not found, create new customer and waller. if found, mint drop for that customer and wallet.
+		function customer_data_str_to_array ($holaplex_customer_data) {
+			$project_id_array = [];	
+			if ($holaplex_customer_data == '' || $holaplex_customer_data == null) {
+				return $project_id_array;
+			}
+			$holaplex_customer_project_array = explode('|', $holaplex_customer_data);
+			foreach ($holaplex_customer_project_array as $holaplex_customer_project) {
+				
+				$holaplex_customer_project_id = explode(':', $holaplex_customer_project)[0];
+				$holaplex_project_customer_wallet = explode(':', $holaplex_customer_project)[1];
+
+				$project_id_array[$holaplex_customer_project_id] = [
+					'customer_id' => explode('&', $holaplex_project_customer_wallet)[0],
+					'wallet_address' => explode('&', $holaplex_project_customer_wallet)[1]
+				];
+			}
+			return $project_id_array;
+		}
+
+		function on_order_complete($order_status, $order_id) {
+			$order = wc_get_order($order_id);
+			$items = $order->get_items();
+			$holaplex_api = new Holaplex_Core();
+
+			foreach ($items as $item) {
+				$product_id = $item->get_product_id();
+				$holaplex_drop_id = get_post_meta($product_id, 'holaplex_drop_id', true);
+				$holaplex_project_id = get_post_meta($product_id, 'holaplex_project_id', true);
+
+				// get current logged in user meta key holaplex_customer_id
+				$holaplex_customer_data = get_user_meta(get_current_user_id(), 'holaplex_customer_id', true);	
+				// split holaplex_customer_id into array
+								
+				$project_id_array = customer_data_str_to_array($holaplex_customer_data);	
+				
+				if (count($project_id_array) == 0 ) {
+					// create new customer and wallet
+					$created_wallet = $holaplex_api->create_customer_wallet($holaplex_project_id);
+
+					$new_customer_data = $holaplex_customer_data . $holaplex_project_id . ':' . $created_wallet['customer_id'] . '&' . $created_wallet['wallet_address'] . '|';
+					// update user meta key holaplex_customer_id
+					update_user_meta(get_current_user_id(), 'holaplex_customer_id', $new_customer_data);
+					
+					$project_id_array = customer_data_str_to_array($new_customer_data);	
+				}
+				
+				if (!array_key_exists($holaplex_project_id, $project_id_array)) {
+					$created_wallet = $holaplex_api->create_customer_wallet($holaplex_project_id);
+					// lala(json_encode($created_wallet));
+
+					$new_customer_data = $holaplex_customer_data . $holaplex_project_id . ':' . $created_wallet['customer_id'] . '&' . $created_wallet['wallet_address'] . '|';
+
+					// update user meta key holaplex_customer_id
+					update_user_meta(get_current_user_id(), 'holaplex_customer_id', $new_customer_data);
+
+					$project_id_array = customer_data_str_to_array($new_customer_data);	
+				}
+												
+				$holaplex_project_customer_wallet = $project_id_array[$holaplex_project_id]['wallet_address'];
+
+				if ($holaplex_project_customer_wallet != '' && $holaplex_project_customer_wallet != null ) {
+					$drop_is_minted = $holaplex_api->mint_drop($holaplex_project_customer_wallet, $holaplex_drop_id);
+
+					add_filter('woocommerce_thankyou_order_received_text', function ( $str, $order ) use ($drop_is_minted, $holaplex_project_customer_wallet) {
+						$new_str = $str;
+						if ($drop_is_minted) {
+							$new_str = $str . ' <br/> <p>Drop minted and sent to receiver wallet: '. $holaplex_project_customer_wallet .'.</p>';
+						}
+						return esc_html($new_str);
+					}, 10, 2 );
+
+				}
+			}
+		}
+
+		// add_action('woocommerce_thankyou', 'lala');
+		// add_action('woocommerce_order_status_completed', function() {
+		// 	lala('woocommerce_order_status_completed');
+		// });
+		// // add_action('woocommerce_payment_complete', 'lala');
+		// add_action('woocommerce_payment_complete_order_status', function() {
+		// 	lala('woocommerce_payment_complete_order_status');
+		// });
+
+		// add_action('woocommerce_payment_complete_order_status_completed', function() {
+		// 	lala('woocommerce_payment_complete_order_status_completed');
+		// });
+		add_action('woocommerce_payment_complete_order_status', 'on_order_complete', 10, 2);
+	}
+
+
+	public function show_drop_after_product_meta() 
+	{
+		function show_drop_after_product_meta()
+		{
+			global $post;
+			$drop_id = get_post_meta($post->ID, 'holaplex_drop_id', true);
+			if ($drop_id && $drop_id !== '') {
+				echo '<div class="holaplex-drop-id">Holaplex Drop: ' . $drop_id . '</div>';
+			}
+		}
+		add_action('woocommerce_product_meta_end', 'show_drop_after_product_meta');
+	}
+
+	
 	public function init_display_holaplex_customer_details_on_profile()
 	{
 		function holaplex_customer_details_shortcode($atts)
