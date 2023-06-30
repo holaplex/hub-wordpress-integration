@@ -93,7 +93,9 @@ function get_customer_nfts()
                   <li class="flex flex-col gap-1">
                     <span class="text-gray-400">Name</span>
                     <span>
+                    <a  target="_blank" href="https://solscan.io/token/<?php echo esc_attr($nft['address']); ?>">
                       <?php echo esc_attr($nft['collection']['metadataJson']['name']); ?>
+                    </a>
                     </span>
                   </li>
                   <li class="flex flex-col gap-1">
