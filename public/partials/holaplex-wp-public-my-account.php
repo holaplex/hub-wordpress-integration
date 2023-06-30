@@ -72,6 +72,11 @@ function get_customer_nfts()
   $customer_nfts = get_customer_nfts();
   $nfts = $customer_nfts['data']['project']['customer']['mints'];
   
+  // if no nfts, show message
+  if (empty($nfts)) {
+    echo '<p>You have no NFTs yet.</p>';
+    return;
+  }
   
   ?>
   
