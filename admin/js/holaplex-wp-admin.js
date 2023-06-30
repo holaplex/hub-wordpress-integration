@@ -31,6 +31,25 @@
 
 
 
+	jQuery(document).ready(function($) {
+    function resizeElementHeight() {
+      const element = $('#holaplex-drops'); // Replace 'your-element' with the ID or class of your target element
+      const calculatedYPosition = element.offset().top;
+      const windowHeight = $(window).height();
+      const remainingSpace = windowHeight - calculatedYPosition - 100;
+  
+      element.height(remainingSpace);
+    }
+  
+    // Call the function on page load
+    resizeElementHeight();
+  
+    // Call the function when the window is resized
+    $(window).resize(function() {
+      resizeElementHeight();
+    });
+  });
+  
 	
 
 })( jQuery );

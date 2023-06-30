@@ -40,6 +40,7 @@ define( 'PLUGIN_NAME_VERSION', '1.0.4' );
 
 define( 'HOLAPLEX_PLUGIN_PATH', plugin_dir_path( __FILE__ ) );
 define( 'HOLAPLEX_NONCE', 'holaplex_ajax_nonce' );
+define( 'HOLAPLEX_MY_ACCOUNT_ENDPOINT', 'holaplex_nft' );
 
 
 /**
