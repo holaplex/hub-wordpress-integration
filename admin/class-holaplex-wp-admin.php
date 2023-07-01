@@ -187,6 +187,31 @@ class Holaplex_Wp_Admin
 
 	public function init_ajax_sync_product_with_item()
 	{
+
+		function imageTypeBasedOnHeaders($url) {
+			$minimumBytes = 1024; // Assuming a minimum of 1KB
+		
+			// Perform the HTTP request
+			$ch = curl_init();
+			curl_setopt($ch, CURLOPT_URL, $url);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+			$response = curl_exec($ch);
+			$contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+			curl_close($ch);
+				
+			// Get the CID from the response headers
+			$headers = get_headers($url);
+		
+			$res = [
+				'contentType' => $contentType,
+				'response' => $response,
+				'headers' => $headers
+			];
+		
+			return $res;
+		}
+		
+
 		function add_product_with_drop_id_callback()
 		{
 			$nonce = isset($_REQUEST['_wpnonce']) ? sanitize_text_field($_REQUEST['_wpnonce']) : '';
@@ -225,29 +250,34 @@ class Holaplex_Wp_Admin
 
 
 			// add drop_image to product thumbnail	
-			// $upload_dir = wp_get_upload_dir();
-			// $image_data = file_get_contents($drop_image);
-			// $filename = basename($drop_image);
-			// if (wp_mkdir_p($upload_dir['path'])) {
-			// 	$file = $upload_dir['path'] . '/' . $filename;
-			// } else {
-			// 	$file = $upload_dir['basedir'] . '/' . $filename;
-			// }
+			$upload_dir = wp_get_upload_dir();
+			$image_data = imageTypeBasedOnHeaders($drop_image);
+			// get file extension from image data
+			$file_ext = explode('/', $image_data['contentType'])[1];
+			// random file name 
+			$filename = uniqid() . '.' . $file_ext;
 
-			// file_put_contents($file, $image_data);
+			if (wp_mkdir_p($upload_dir['path'])) {
+				$file = $upload_dir['path'] . '/' . $filename;
+			} else {
+				$file = $upload_dir['basedir'] . '/' . $filename;
+			}
 
-			// $wp_filetype = wp_check_filetype($filename, null);
+			file_put_contents($file, file_get_contents($drop_image));
+
 			// // save image to product thumbail
-			// $attachment = array(
-			// 	'post_mime_type' => $wp_filetype['type'],
-			// 	'post_title' => sanitize_file_name($filename),
-			// 	'post_content' => '',
-			// 	'post_status' => 'inherit',
-			// 	'post_parent' => $product_id
-			// );
+			$attachment = array(
+				'post_mime_type' => $image_data['contentType'],
+				'post_title' => sanitize_file_name($filename),
+				'post_content' => '',
+				'post_status' => 'inherit',
+				'post_parent' => $product_id
+			);
 
 			// // save attachement
-			// $attach_id = wp_insert_attachment($attachment, $file, $product_id);
+			$attach_id = wp_insert_attachment($attachment, $file, $product_id);
+			// // set product thumbnail
+			set_post_thumbnail($product_id, $attach_id);
 
 
 			// Example response
