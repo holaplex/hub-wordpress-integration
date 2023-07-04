@@ -97,11 +97,19 @@
                   if (!empty($holaplex_products)) {
                     foreach ($holaplex_products as $product) {
                       $nonce = wp_create_nonce(HOLAPLEX_NONCE);
+                      $holaplex_drop_id = $product->get_meta('holaplex_drop_id');
+                      $holaplex_project_id = $product->get_meta('holaplex_project_id');
+                      $drop = $project_drops[$holaplex_drop_id];
+                      $drop_name = $drop['collection']['metadataJson']['name'];
+                      $collection_supply = $drop['collection']['supply'] - $drop['collection']['totalMints'];
+                      $drop_status = $drop['status'];
 
                       echo "<li class='table-row'>";
-                      echo "<div class='col-2'><a href=''>" . esc_html($product->get_name()) . "</a></div>";
-                      echo "<div class='col-1'>" . '' . "</div>";
-                      echo "<div class='col-1'>" . '' . "</div>";
+                      echo "<div class='col-3'>
+                        <a target='_blank' href='".esc_url("https://hub.holaplex.com/projects/$holaplex_project_id/drops/$holaplex_drop_id/mints")."'>" . esc_html($drop_name) . 
+                        "</a><br /> <p class='product-name'>Product: ".esc_html($product->get_name())."</p></div>";
+                      echo "<div class='col-1'>" . esc_html($collection_supply) . "</div>";
+                      echo "<div class='col-1'>" . esc_html($drop_status) . "</div>";
                       echo "<div class='col-2'><button data-product-id='".esc_attr($product->get_id())."' data-wp-nonce='".esc_attr($nonce)."' class='btn btn-remove'>Remove</button></div>";
                       echo "</li>";
                     }

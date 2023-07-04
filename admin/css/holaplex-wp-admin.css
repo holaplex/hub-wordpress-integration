@@ -236,3 +236,8 @@ p.submit {
 #holaplex-drops {
   min-height: 700px;
 }
+
+.holaplex-app .product-name {
+  margin: 0;
+  line-height: 1;
+}
