@@ -61,12 +61,17 @@ jQuery(document).ready(function ($) {
     });
     $('.import-btn').on('click', function (e) {
         e.preventDefault();
+        const ele = $(this);
         const drop_id = this.dataset.dropId;
         const dropName = this.dataset.dropName;
         const dropDesc = this.dataset.dropDesc;
         const dropImage = this.dataset.dropImage;
         const projectId = this.dataset.projectId;
         const nonce = this.dataset.wpNonce;
+
+
+        // show loading
+        ele.text('Importing...');
 
         $.ajax({
             url: holaplex_wp_ajax.ajax_url,
@@ -82,11 +87,14 @@ jQuery(document).ready(function ($) {
             },
             success: function (response) {
                 // Handle the successful AJAX response
-                console.log(response);
+                // disable button
+                ele.prop('disabled', true);
+                // change text to imported
+                ele.text('Imported');
             },
             error: function (xhr, status, error) {
+                ele.text('Failed');
                 // Handle AJAX error
-                console.log(error);
             }
         });
     });

@@ -189,7 +189,6 @@ class Holaplex_Wp_Admin
 	{
 
 		function imageTypeBasedOnHeaders($url) {
-			$minimumBytes = 1024; // Assuming a minimum of 1KB
 		
 			// Perform the HTTP request
 			$ch = curl_init();
@@ -209,6 +208,23 @@ class Holaplex_Wp_Admin
 			];
 		
 			return $res;
+		}
+		function getFileExtensionByMimeType($mimeType) {
+			$extensions = [
+				'image/jpeg' => 'jpg',
+				'image/png' => 'png',
+				'image/gif' => 'gif',
+				'image/bmp' => 'bmp',
+				'image/webp' => 'webp'
+				// Add more common image formats and their corresponding extensions here
+			];
+		
+			// Check if the MIME type exists in the array
+			if (isset($extensions[$mimeType])) {
+				return $extensions[$mimeType];
+			}
+		
+			return null; // Return null if no matching extension found
 		}
 		
 
@@ -253,7 +269,7 @@ class Holaplex_Wp_Admin
 			$upload_dir = wp_get_upload_dir();
 			$image_data = imageTypeBasedOnHeaders($drop_image);
 			// get file extension from image data
-			$file_ext = explode('/', $image_data['contentType'])[1];
+			$file_ext = getFileExtensionByMimeType($image_data['contentType']);
 			// random file name 
 			$filename = uniqid() . '.' . $file_ext;
 
@@ -264,6 +280,7 @@ class Holaplex_Wp_Admin
 			}
 
 			file_put_contents($file, file_get_contents($drop_image));
+			// file_put_contents($file, $image_data['response']);
 
 			// // save image to product thumbail
 			$attachment = array(
@@ -271,14 +288,14 @@ class Holaplex_Wp_Admin
 				'post_title' => sanitize_file_name($filename),
 				'post_content' => '',
 				'post_status' => 'inherit',
-				'post_parent' => $product_id
 			);
 
-			// // save attachement
 			$attach_id = wp_insert_attachment($attachment, $file, $product_id);
+			$attach_data = wp_generate_attachment_metadata( $attach_id, $file );
+			// Assign metadata to attachment
+			wp_update_attachment_metadata($attach_id, $attach_data );
 			// // set product thumbnail
 			set_post_thumbnail($product_id, $attach_id);
-
 
 			// Example response
 			$response = array('success' => true, 'product' => $product_id);

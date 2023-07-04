@@ -163,6 +163,7 @@
   background: #fff;
   padding: 1em 2em;
   height: 80%;
+  overflow-y: scroll;
 }
 .holaplex-app .modal__footer {
   text-align: right;

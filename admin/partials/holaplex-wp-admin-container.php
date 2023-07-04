@@ -95,7 +95,7 @@
               if (!empty($holaplex_products)) {
                 foreach ($holaplex_products as $product) {
                   echo "<li class='table-row'>";
-                  echo "<div class='col-2'>" . esc_html($product->get_name()) . "</div>";
+                  echo "<div class='col-2'><a href=''>" . esc_html($product->get_name()) . "</a></div>";
                   echo "<div class='col-1'>" . '' . "</div>";
                   echo "<div class='col-1'>" . '' . "</div>";
                   echo "<div class='col-1'><button class='btn btn-primary'>Remove</button></div>";
