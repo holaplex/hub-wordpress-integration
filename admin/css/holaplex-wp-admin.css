@@ -203,7 +203,7 @@
   position: relative;
   width: 65%;
   max-width: 90%;
-  background: #fff;
+  background: #e7e7e7;
   padding: 1em 2em;
   height: 80%;
   overflow-y: scroll;
@@ -227,4 +227,8 @@
   right: 10px;
   color: #585858;
   text-decoration: none;
+}
+
+p.submit {
+  position: relative;
 }
