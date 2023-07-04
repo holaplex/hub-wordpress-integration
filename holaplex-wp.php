@@ -16,7 +16,7 @@
  * Plugin Name:       Holaplex Integration Plugin for WordPress
  * Plugin URI:        http://holaplex.com/holaplex-wp/
  * Description:       This plugin allows you to sync and mint NFTs created on Holaplex directly through your WordPress site.
- * Version:           1.0.7
+ * Version:           1.0.8
  * Author:            Holaplex.com
  * Author URI:        http://holaplex.com/
  * License:           GPL-2.0+
@@ -35,7 +35,7 @@ if ( ! defined( 'WPINC' ) ) {
  * Start at version 1.0.0 and use SemVer - https://semver.org
  * Rename this for your plugin and update it as you release new versions.
  */
-define( 'PLUGIN_NAME_VERSION', '1.0.7' );
+define( 'PLUGIN_NAME_VERSION', '1.0.8' );
 
 
 define( 'HOLAPLEX_PLUGIN_PATH', plugin_dir_path( __FILE__ ) );

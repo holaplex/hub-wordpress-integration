@@ -8,6 +8,7 @@
         echo "<p class='description help-mesg'>
                   Connect to Holaplex Hub on the SETUP / CONFIG tab before you can import drops.
                 </p>";
+        echo '<a href="#" class="modal__close">&times;</a>';
         return;
       }
       ?>

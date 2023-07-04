@@ -1,14 +1,5 @@
 jQuery(document).ready(function ($) {
 
-    $('.holaplex-tablinks').on('click', function (e) {
-        e.preventDefault();
-        $('.holaplex-tablinks').removeClass('active');
-        $(this).addClass('active');
-        $('.holaplex-tab-content').removeClass('active');
-        $(this.dataset.tab).addClass('active');
-    })
-
-
     $('#mainform').on('submit', function (e) {
         e.preventDefault();
         e.stopPropagation();
@@ -91,6 +82,8 @@ jQuery(document).ready(function ($) {
                 ele.prop('disabled', true);
                 // change text to imported
                 ele.text('Imported');
+                window.location.hash = '#holaplex-drops';
+                window.location.reload();
             },
             error: function (xhr, status, error) {
                 ele.text('Failed');
@@ -98,5 +91,45 @@ jQuery(document).ready(function ($) {
             }
         });
     });
+
+
+    // #remove-btn should send an ajax request with nonce and product id to wp
+	$('.btn-remove').on('click', function (e) {
+		e.preventDefault();
+		const ele = $(this);
+		const product_id = this.dataset.productId;
+		const nonce = this.dataset.wpNonce;
+
+		// show confirm dialog
+		if (!window.confirm("Are you sure you want to remove this drop? The associated product will be deleted.")) {
+			return;
+		}
+
+		// show loading
+		ele.text('Removing...');
+
+		$.ajax({
+			url: holaplex_wp_ajax.ajax_url,
+			type: 'POST',
+			data: {
+				action: 'remove_product_with_product_id',
+				product_id: product_id,
+				_wpnonce: nonce,
+			},
+			success: function (response) {
+				// Handle the successful AJAX response
+				// disable button
+				ele.prop('disabled', true);
+				// change text to imported
+				ele.text('Removed');
+                window.location.hash = '#holaplex-drops';
+                window.location.reload();
+			},
+			error: function (xhr, status, error) {
+				ele.text('Failed');
+				// Handle AJAX error
+			}
+		});
+	});
 });
 

@@ -3,8 +3,8 @@
     <!-- two tabs -->
     <div class="col-md-12 col-sm-12 col-lg-6">
       <div class="holaplex-tabs">
-        <button class="holaplex-tablinks active" data-tab="#holaplex-setup">Setup / Config</button>
-        <button class="holaplex-tablinks" data-tab="#holaplex-drops">Drops</button>
+        <a class="holaplex-tablinks active" href="#holaplex-setup">Setup / Config</a>
+        <a class="holaplex-tablinks" href="#holaplex-drops">Drops</a>
       </div>
     </div>
   </div>
@@ -67,48 +67,54 @@
     </section>
 
     <section id="holaplex-drops" class="col-md-12 col-sm-12 col-lg-12 holaplex-tab-content">
-      <h2><?php echo esc_html(__('Drops', 'holaplex-wp')); ?></h2>
+      <h2 style="margin-bottom: 0;"><?php echo esc_html(__('Drops', 'holaplex-wp')); ?></h2>
       <div class="row">
-        <div class="col-md-6">
-          <h4 class="description">
-            Import your Holaplex Hub Drops as products to make them available to sell or claim through your store.
-          </h4>
-        </div>
-        <div class="col-md-2">
-          <div class="header-actions">
-            <a href="#drops-modal" class="btn btn-primary align-self-right">Import</a>
+        <div class="col-lg-8">
+          <div class="row">
+            <div class="col-md-6">
+              <h4 class="description">
+                Import your Holaplex Hub Drops as products to make them available to sell or claim through your store.
+              </h4>
+            </div>
+            <div class="col-md-2">
+              <div class="header-actions">
+                <a href="#drops-modal" class="btn btn-primary align-self-right">Import drops</a>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-md-8">
-          <ul class="responsive-table">
-            <li class="table-header">
-              <div class="col-2">Name</div>
-              <div class="col-1">Supply</div>
-              <div class="col-1">Status</div>
-              <div class="col-1">Import</div>
-            </li>
-            <?php 
-  
-              // if $holaplex_products is not empty show the products, else show message
-              if (!empty($holaplex_products)) {
-                foreach ($holaplex_products as $product) {
-                  echo "<li class='table-row'>";
-                  echo "<div class='col-2'><a href=''>" . esc_html($product->get_name()) . "</a></div>";
-                  echo "<div class='col-1'>" . '' . "</div>";
-                  echo "<div class='col-1'>" . '' . "</div>";
-                  echo "<div class='col-1'><button class='btn btn-primary'>Remove</button></div>";
-                  echo "</li>";
-                }
-              } else {
-                echo "<li class='table-row'>";
-                echo "<div class='col-12'><p class='description'>" . esc_html(__('No drops imported.', 'holaplex-wp')) . "</p></div>";
-                echo "</li>";
-              }
-  
-            ?>
-          </ul>
+          <div class="row">
+            <div class="col-md-8">
+              <ul class="responsive-table">
+                <li class="table-header">
+                  <div class="col-2">Name</div>
+                  <div class="col-1">Supply</div>
+                  <div class="col-1">Status</div>
+                  <div class="col-2">Import</div>
+                </li>
+                <?php 
+      
+                  // if $holaplex_products is not empty show the products, else show message
+                  if (!empty($holaplex_products)) {
+                    foreach ($holaplex_products as $product) {
+                      $nonce = wp_create_nonce(HOLAPLEX_NONCE);
+
+                      echo "<li class='table-row'>";
+                      echo "<div class='col-2'><a href=''>" . esc_html($product->get_name()) . "</a></div>";
+                      echo "<div class='col-1'>" . '' . "</div>";
+                      echo "<div class='col-1'>" . '' . "</div>";
+                      echo "<div class='col-2'><button data-product-id='".esc_attr($product->get_id())."' data-wp-nonce='".esc_attr($nonce)."' class='btn btn-remove'>Remove</button></div>";
+                      echo "</li>";
+                    }
+                  } else {
+                    echo "<li class='table-row'>";
+                    echo "<div class='col-12'><p class='description'>" . esc_html(__('No drops imported.', 'holaplex-wp')) . "</p></div>";
+                    echo "</li>";
+                  }
+      
+                ?>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
       <?php include_once( HOLAPLEX_PLUGIN_PATH . 'admin/partials/holaplex-wp-admin-import-drops.php'); ?>

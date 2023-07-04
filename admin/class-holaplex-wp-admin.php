@@ -61,6 +61,7 @@ class Holaplex_Wp_Admin
 		$this->login_to_holaplex();
 		$this->add_holaplex_menu();
 		$this->init_ajax_sync_product_with_item();
+		$this->init_ajax_remove_product_from_item();
 		$this->init_add_holaplex_customer_id_field();
 		$this->init_save_holaplex_customer_id_field();
 		$this->init_ajax_holaplex_disconnect();
@@ -115,6 +116,27 @@ class Holaplex_Wp_Admin
 		wp_enqueue_script('holaplex-ajax-admin', plugin_dir_url(__FILE__) . 'js/holaplex-ajax-admin.js', array('jquery'), $this->version, false);
 
 		wp_localize_script('holaplex-ajax-admin', 'holaplex_wp_ajax', array('ajax_url' => admin_url('admin-ajax.php')));
+	}
+
+	public function init_ajax_remove_product_from_item () 
+	{
+		function remove_product_with_id_callback() {
+			// handle nonce
+			$nonce = isset($_REQUEST['_wpnonce']) ? sanitize_text_field($_REQUEST['_wpnonce']) : '';
+			if (!wp_verify_nonce($nonce, HOLAPLEX_NONCE)) {
+				die('Invalid nonce');
+			}
+			$product_id = isset($_POST['product_id']) ? sanitize_text_field($_POST['product_id']) : null;
+
+			// delete or move product to trash 
+			wp_trash_post($product_id);
+
+
+			wp_send_json_success();
+		}
+		add_action('wp_ajax_remove_product_with_product_id', 'remove_product_with_id_callback');
+		add_action('wp_ajax_nopriv_remove_product_with_product_id', 'remove_product_with_id_callback');
+
 	}
 
 	public function add_wc_products_drop_id_filter()
@@ -280,7 +302,6 @@ class Holaplex_Wp_Admin
 			}
 
 			file_put_contents($file, file_get_contents($drop_image));
-			// file_put_contents($file, $image_data['response']);
 
 			// // save image to product thumbail
 			$attachment = array(

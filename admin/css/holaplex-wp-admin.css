@@ -2,38 +2,79 @@
  * All of the CSS for your admin-specific functionality should be
  * included in this file.
  */
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Koulen&family=Lato&family=Nunito&family=Playfair+Display:ital@1&family=Prata&family=Raleway:ital,wght@1,100&family=Roboto&family=Roboto+Condensed&family=Teko&display=swap');
 
+.holaplex-app .btn {
 
- .holaplex-app .help-mesg {
+  font-family: Roboto, sans-serif;
+  font-weight: 0;
+  font-size: 14px;
+  color: #fff;
+  background-color: #0066CC;
+  padding: 10px 30px;
+  box-shadow: rgb(0, 0, 0) 0px 0px 0px 0px;
+  border-radius: 3px;
+  transition: 1000ms;
+  transform: translateY(0);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.holaplex-app .btn:hover {
+  transition: 1000ms;
+  transform: translateY(-0px);
+  opacity: 0.7;
+}
+
+.holaplex-app .btn-remove {
+  padding: 7px 10px;
+  background-color: #9f9f9f;
+  border: none;
+  color: black;
+  font-weight: 600;
+}
+
+.holaplex-app .help-mesg {
   font-size: 15px;
   line-height: 2;
 }
+
 .holaplex-app .responsive-table li {
   border-radius: 3px;
-  padding: 25px 30px;
+  padding: 20px 20px;
   display: flex;
   justify-content: space-between;
-  margin-bottom: 25px;
+  margin-bottom: 12px;
 }
+
 .holaplex-app .responsive-table .table-header {
-  background-color: #f3f36d;
+  background-color: #e0e0e0;
   font-size: 14px;
   text-transform: uppercase;
   letter-spacing: 0.03em;
+  margin-bottom: 15px;
+  padding: 10px 20px;
 }
+
 .holaplex-app .responsive-table .table-row {
   background-color: #fff;
-  box-shadow: 0px 0px 9px 0px rgba(0, 0, 0, 0.1);
 }
+
 .holaplex-app .responsive-table .col-1 {
   flex-basis: 10%;
 }
+
 .holaplex-app .responsive-table .col-2 {
   flex-basis: 40%;
 }
+
 .holaplex-app .responsive-table .col-3 {
   flex-basis: 25%;
 }
+
 .holaplex-app .responsive-table .col-4 {
   flex-basis: 25%;
 }
@@ -42,31 +83,34 @@
 @media all and (max-width: 767px) {
   .holaplex-app .responsive-table .table-header {
     display: none;
- }
+  }
+
   .holaplex-app .responsive-table li {
     display: block;
- }
+  }
+
   .holaplex-app .responsive-table .col {
     flex-basis: 100%;
- }
+  }
+
   .holaplex-app .responsive-table .col {
     display: flex;
     padding: 10px 0;
- }
+  }
+
   .holaplex-app .responsive-table .col:before {
     color: #6c7a89;
     padding-right: 10px;
     content: attr(data-label);
     flex-basis: 50%;
     text-align: right;
- }
-  
+  }
+
 }
 
 
 .holaplex-app .form-table input,
-.holaplex-app .form-table select 
-{
+.holaplex-app .form-table select {
   width: 100% !important;
   max-width: 400px;
 }
@@ -75,6 +119,7 @@
 .holaplex-app .holaplex-tab-content {
   display: none;
 }
+
 .holaplex-app .holaplex-tab-content.active {
   display: block;
 }
@@ -93,40 +138,35 @@
   border-bottom: 1px solid #ccc;
 }
 
+.holaplex-app a.holaplex-tablinks {
+  padding: 10px 20px;
+  background-color: white;
+  border-bottom: solid 1px #0066cb;
+  cursor: pointer;
+  text-decoration: none;
+}
+
 /* hide button in .holaplex-app except button-primary woocommerce-save-button main-btn */
 .holaplex-app .woocommerce-save-button[type="submit"]:not(.s-btn) {
   display: none;
 }
+
 .holaplex-app .bootstrap-wrapper button.show-btn {
   display: block !important;
 }
-.holaplex-app button.holaplex-tablinks {
-  display: block !important;
-  background-color: transparent;
-  border: none;
-  font-size: 1rem;
-  padding: 7px 10px;
-  border: 1px solid #ccc;
-  border-bottom: none;
-  cursor: pointer;
-  background: #fff;
-  color: #000;
-  font-weight: bold;
-  text-transform: uppercase;
-  font-size: 12px;
-  letter-spacing: 0.03em;
-  border-radius: 3px 3px 0 0;
-}
+
 .holaplex-app .header-actions {
   display: flex;
   justify-content: flex-end;
 }
+
 .holaplex-app .modal-wrapper {
- /* This part is important for centering the content */
+  /* This part is important for centering the content */
   display: flex;
   align-items: center;
   justify-content: center;
 }
+
 .holaplex-app .modal-wrapper a {
   display: inline-block;
   text-decoration: none;
@@ -137,6 +177,7 @@
   color: #585858;
   font-family: 'Roboto', sans-serif;
 }
+
 .holaplex-app .modal {
   visibility: hidden;
   opacity: 0;
@@ -151,10 +192,12 @@
   background: rgba(77, 77, 77, .7);
   transition: all 0.4s;
 }
+
 .holaplex-app .modal:target {
   visibility: visible;
   opacity: 1;
 }
+
 .holaplex-app .modal__content {
   border-radius: 4px;
   position: relative;
@@ -165,15 +208,19 @@
   height: 80%;
   overflow-y: scroll;
 }
+
 .holaplex-app .modal__footer {
   text-align: right;
 }
+
 .holaplex-app .modal__footer a {
   color: #585858;
 }
+
 .holaplex-app .modal__footer i {
   color: #d02d2c;
 }
+
 .holaplex-app .modal__close {
   position: absolute;
   top: 10px;
