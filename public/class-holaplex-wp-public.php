@@ -57,7 +57,6 @@ class Holaplex_Wp_Public
 		$this->init_create_customer_wallet_callback();
 		$this->init_create_new_wallet_callback();
 		$this->init_remove_customer_wallet_callback();
-		$this->show_drop_after_product_meta();
 		$this->mint_drop_on_order_complete();
 		$this->init_display_nft_tab_on_my_account();
 	}
