@@ -23,6 +23,7 @@ Upload the holaplex-integration folder to the /wp-content/plugins/ directory.
 Activate the plugin through the 'Plugins' menu in WordPress.
 Go to the plugin settings page in your WordPress dashboard (WooCommerce > Settings > Holaplex Integration).
 Enter your Holaplex API credentials and save the settings.
+Refresh your Wordpress Permalinks settings
 == Usage ==
 
 After installation and configuration, the plugin will automatically sync NFTs from Holaplex to your WooCommerce store.

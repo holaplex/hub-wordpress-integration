@@ -60,12 +60,14 @@ class Holaplex_Wp_Admin
 		$this->add_wc_products_drop_id_filter();
 		$this->login_to_holaplex();
 		$this->add_holaplex_menu();
-		$this->init_ajax_sync_product_with_item();
-		$this->init_ajax_remove_product_from_item();
+		$this->init_ajax_sync_product_with_drop();
+		$this->init_ajax_sync_drop_id_with_product();
+		$this->init_ajax_remove_product_from_drop();
 		$this->init_add_holaplex_customer_id_field();
 		$this->init_save_holaplex_customer_id_field();
 		$this->init_ajax_holaplex_disconnect();
 		$this->init_ajax_holaplex_connect();
+		$this->add_holaplex_menu_to_product_data_tabs();
 	}
 
 	/**
@@ -118,13 +120,110 @@ class Holaplex_Wp_Admin
 		wp_localize_script('holaplex-ajax-admin', 'holaplex_wp_ajax', array('ajax_url' => admin_url('admin-ajax.php')));
 	}
 
-	public function init_ajax_remove_product_from_item () 
+	public function init_ajax_sync_drop_id_with_product () 
 	{
-		function remove_product_with_id_callback() {
+
+		function add_drop_id_to_product_callback () {
+			// check nonce
+			global $post;
+			$nonce = isset($_REQUEST['_wpnonce']) ? sanitize_text_field($_REQUEST['_wpnonce']) : '';
+			if (!wp_verify_nonce($nonce, 'holaplex_sync_product_with_item')) {
+				wp_send_json_error(null, 500);
+			}
+			$project_id = isset($_POST['project_id']) ? sanitize_text_field($_POST['project_id']) : null;
+			$drop_id = isset($_POST['drop_id']) ? sanitize_text_field($_POST['drop_id']) : null;
+			$post_id = isset($_POST['post_id']) ? sanitize_text_field($_POST['post_id']) : null;
+
+			if (!$project_id || !$drop_id || !$post_id) {
+				die('Missing project_id, post_id or drop_id');
+				wp_send_json_error('Missing required params: project_id, post_id or drop_id', 500);
+			}
+
+			update_post_meta($post_id, 'holaplex_drop_id', $drop_id);
+			update_post_meta($post_id, 'holaplex_project_id', $project_id);
+
+		}
+
+		add_action('wp_ajax_add_drop_id_to_product', 'add_drop_id_to_product_callback');
+		add_action('wp_ajax_nopriv_add_drop_id_to_product', 'add_drop_id_to_product_callback');
+	}
+
+	public function add_holaplex_menu_to_product_data_tabs()
+	{
+		$holaplex_projects = $this->holaplex_projects;
+		$holaplex_status = $this->holaplex_status;
+
+		$project_drops = [];
+		foreach ($holaplex_projects as $project) {
+			foreach ($project['drops'] as $drop) {
+				$drop['project_id'] = $project['id'];
+				$project_drops[$drop['id']] = $drop;
+			}
+		}
+
+		function woo_new_product_tab($tabs)
+		{
+			$tabs['holaplex_tab'] = array(
+				'label' 	=> __('Holaplex Hub', 'holaplex-wp'),
+				'target'  =>  'holaplex_menu_product_tab_content',
+				'priority' => 60,
+				'class'   => array()
+			);
+
+			return $tabs;
+		}
+
+		add_filter('woocommerce_product_data_tabs', 'woo_new_product_tab', 10, 1);
+		add_action('woocommerce_product_data_panels', function () use ($project_drops, $holaplex_status) {
+
+			$current_drop_id = get_post_meta(get_the_ID(), 'holaplex_drop_id', true);
+			$nonce = wp_create_nonce('holaplex_sync_product_with_item');
+			
+?>
+
+			<div id="holaplex_menu_product_tab_content" class="panel woocommerce_options_panel">
+				<p class="form-field holaplex-status">
+					<label for="holaplex_status">Holaplex Status</label>
+					<span class="woocommerce-help-tip"></span>
+					<input type="text" class="short" name="holaplex_status" id="holaplex_status" value="<?php echo esc_html($holaplex_status); ?>" readonly>
+				</p>
+				<!-- show a drop down list of holaplex drops -->
+				<p class="holaplex_drop_id_field form-field">
+					<label for="_stock_status">Drops</label>
+					<span class="woocommerce-help-tip"></span> 
+					<select style="" id="_holaplex_drop_project_ids" name="_holaplex_drop_project_id" class="select short">
+						<option value="">Select a drop</option>
+						<?php foreach ($project_drops as $drop) { 
+										$drop_id = $drop['id'];
+										$drop_name = $drop['collection']['metadataJson']['name'];
+										$collection_supply = $drop['collection']['supply'] - $drop['collection']['totalMints'];
+										$drop_status = $drop['status'];
+										$drop_project_id = $drop['project_id'];
+						?>
+							
+							<option <?php echo esc_attr($current_drop_id) === $drop_id ? 'selected' : null; ?> value="<?php echo esc_attr("$drop_id|$drop_project_id"); ?>"><?php echo esc_html("🖼️$drop_name -Supply: $collection_supply -Status: $drop_status"); ?></option>
+						<?php } ?>
+					</select>
+				</p>
+				<p class="holaplex_tab_submit_data form-field">
+					<button data-wp-nonce="<?php echo esc_attr($nonce); ?>" type="button" class="button button-primary button-large" id="holaplex_tab_submit_data">Submit</button>
+				</p>
+			</div>
+			
+
+		<?php
+
+		});
+	}
+
+	public function init_ajax_remove_product_from_drop()
+	{
+		function remove_product_with_id_callback()
+		{
 			// handle nonce
 			$nonce = isset($_REQUEST['_wpnonce']) ? sanitize_text_field($_REQUEST['_wpnonce']) : '';
 			if (!wp_verify_nonce($nonce, HOLAPLEX_NONCE)) {
-				die('Invalid nonce');
+				wp_send_json_error(null, 500);
 			}
 			$product_id = isset($_POST['product_id']) ? sanitize_text_field($_POST['product_id']) : null;
 
@@ -136,7 +235,6 @@ class Holaplex_Wp_Admin
 		}
 		add_action('wp_ajax_remove_product_with_product_id', 'remove_product_with_id_callback');
 		add_action('wp_ajax_nopriv_remove_product_with_product_id', 'remove_product_with_id_callback');
-
 	}
 
 	public function add_wc_products_drop_id_filter()
@@ -188,7 +286,7 @@ class Holaplex_Wp_Admin
 		function add_holaplex_customer_id_field($user)
 		{
 			$holaplex_customer_id = get_user_meta($user->ID, 'holaplex_customer_id', true);
-?>
+		?>
 			<h3><?php _e('Holaplex Customer ID', 'holaplex-wp'); ?></h3>
 			<table class="form-table">
 				<tr>
@@ -200,18 +298,19 @@ class Holaplex_Wp_Admin
 					</td>
 				</tr>
 			</table>
-	<?php
+		<?php
 		}
 		add_action('show_user_profile', 'add_holaplex_customer_id_field');
 		add_action('edit_user_profile', 'add_holaplex_customer_id_field');
 	}
 
 
-	public function init_ajax_sync_product_with_item()
+	public function init_ajax_sync_product_with_drop()
 	{
 
-		function imageTypeBasedOnHeaders($url) {
-		
+		function imageTypeBasedOnHeaders($url)
+		{
+
 			// Perform the HTTP request
 			$ch = curl_init();
 			curl_setopt($ch, CURLOPT_URL, $url);
@@ -219,19 +318,20 @@ class Holaplex_Wp_Admin
 			$response = curl_exec($ch);
 			$contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
 			curl_close($ch);
-				
+
 			// Get the CID from the response headers
 			$headers = get_headers($url);
-		
+
 			$res = [
 				'contentType' => $contentType,
 				'response' => $response,
 				'headers' => $headers
 			];
-		
+
 			return $res;
 		}
-		function getFileExtensionByMimeType($mimeType) {
+		function getFileExtensionByMimeType($mimeType)
+		{
 			$extensions = [
 				'image/jpeg' => 'jpg',
 				'image/png' => 'png',
@@ -240,21 +340,21 @@ class Holaplex_Wp_Admin
 				'image/webp' => 'webp'
 				// Add more common image formats and their corresponding extensions here
 			];
-		
+
 			// Check if the MIME type exists in the array
 			if (isset($extensions[$mimeType])) {
 				return $extensions[$mimeType];
 			}
-		
+
 			return null; // Return null if no matching extension found
 		}
-		
+
 
 		function add_product_with_drop_id_callback()
 		{
 			$nonce = isset($_REQUEST['_wpnonce']) ? sanitize_text_field($_REQUEST['_wpnonce']) : '';
 			if (!wp_verify_nonce($nonce, HOLAPLEX_NONCE)) {
-				die('Invalid nonce');
+				wp_send_json_error(null, 500);
 			}
 			// sanitize the input
 			$drop_id =  isset($_POST['drop_id']) ? sanitize_text_field($_POST['drop_id']) : '';
@@ -266,13 +366,13 @@ class Holaplex_Wp_Admin
 
 			$product = new WC_Product_Simple();
 
-			$product->set_name( $drop_name ); // product title
+			$product->set_name($drop_name); // product title
 
-			$product->set_regular_price( 0.01 ); // in current shop currency
+			$product->set_regular_price(0.01); // in current shop currency
 
-			$product->set_short_description( $drop_description );
+			$product->set_short_description($drop_description);
 			// you can also add a full product description
-			$product->set_description( $drop_description );
+			$product->set_description($drop_description);
 
 			// $product->set_image_id( 90 );
 
@@ -284,7 +384,7 @@ class Holaplex_Wp_Admin
 			// add drop_id to product meta
 			update_post_meta($product_id, 'holaplex_drop_id', $drop_id);
 			update_post_meta($product_id, 'holaplex_project_id', $drop_project_id);
-			update_post_meta( $product_id, '_regular_price', "0.01" );
+			update_post_meta($product_id, '_regular_price', "0.01");
 
 
 			// add drop_image to product thumbnail	
@@ -312,9 +412,9 @@ class Holaplex_Wp_Admin
 			);
 
 			$attach_id = wp_insert_attachment($attachment, $file, $product_id);
-			$attach_data = wp_generate_attachment_metadata( $attach_id, $file );
+			$attach_data = wp_generate_attachment_metadata($attach_id, $file);
 			// Assign metadata to attachment
-			wp_update_attachment_metadata($attach_id, $attach_data );
+			wp_update_attachment_metadata($attach_id, $attach_data);
 			// // set product thumbnail
 			set_post_thumbnail($product_id, $attach_id);
 
@@ -490,7 +590,7 @@ class Holaplex_Wp_Admin
 				if (count($products) > 0) {
 					return '<span class="synced">Synced</span><button class="" id="remove-sync-btn">Remove</button>';
 				} else {
-					return '<button class="import-btn" data-project-id="'.esc_attr($project_id).'" data-drop-image="' . esc_attr($drop_image) . '" data-drop-name="' . esc_attr($drop_name) . '" data-drop-desc="' . esc_attr($drop_description) . '"  data-wp-nonce="' . esc_attr($nonce) . '" data-drop-id="' . esc_attr($drop_id) . '">Import</button>';
+					return '<button class="import-btn" data-project-id="' . esc_attr($project_id) . '" data-drop-image="' . esc_attr($drop_image) . '" data-drop-name="' . esc_attr($drop_name) . '" data-drop-desc="' . esc_attr($drop_description) . '"  data-wp-nonce="' . esc_attr($nonce) . '" data-drop-id="' . esc_attr($drop_id) . '">Import</button>';
 				}
 			}
 

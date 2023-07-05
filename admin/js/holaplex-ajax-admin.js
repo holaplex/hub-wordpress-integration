@@ -50,6 +50,46 @@ jQuery(document).ready(function ($) {
             }
         });
     });
+    $('#holaplex_tab_submit_data').on('click', function (e) {
+        e.preventDefault();
+        const ele = $(this);
+
+        let drop_project_id = $('#_holaplex_drop_project_ids').val();
+        drop_project_id = drop_project_id.split('|');
+        const drop_id = drop_project_id[0];
+        const projectId = drop_project_id[1];
+        // url query param for post
+        const urlParams = new URLSearchParams(window.location.search);
+        const postId = urlParams.get('post');
+        const nonce = this.dataset.wpNonce;
+        // show loading
+        ele.text('Importing...');
+
+        $.ajax({
+            url: holaplex_wp_ajax.ajax_url,
+            type: 'POST',
+            data: {
+                action: 'add_drop_id_to_product',
+                drop_id: drop_id,
+                _wpnonce: nonce,
+                project_id: projectId,
+                post_id: postId
+            },
+            success: function (response) {
+                // Handle the successful AJAX response
+                // disable button
+                ele.prop('disabled', true);
+                // change text to imported
+                ele.text('Imported');
+            },
+            error: function (xhr, status, error) {
+                ele.text('Failed');
+                // Handle AJAX error
+            }
+        });
+    });
+
+    
     $('.import-btn').on('click', function (e) {
         e.preventDefault();
         const ele = $(this);
@@ -92,6 +132,7 @@ jQuery(document).ready(function ($) {
         });
     });
 
+    
 
     // #remove-btn should send an ajax request with nonce and product id to wp
 	$('.btn-remove').on('click', function (e) {

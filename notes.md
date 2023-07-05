@@ -1,0 +1,2 @@
+- After installing the plugin, Reload your Wordpress site Permalinks
+- 

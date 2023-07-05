@@ -47,7 +47,7 @@
   padding: 20px 20px;
   display: flex;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 9px;
 }
 
 .holaplex-app .responsive-table .table-header {
@@ -144,6 +144,7 @@
   border-bottom: solid 1px #0066cb;
   cursor: pointer;
   text-decoration: none;
+  margin-left: 4px;
 }
 
 /* hide button in .holaplex-app except button-primary woocommerce-save-button main-btn */
