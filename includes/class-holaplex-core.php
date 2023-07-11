@@ -5,6 +5,24 @@
 class Holaplex_Core
 {
 
+	public function holaplex_display_custom_text () {
+		if (get_option("holaplex_custom_text")) {
+			$custom_text = get_option("holaplex_custom_text");
+		} else {
+			$hidden_content_text = __('Purchase this item to view this hidden content', 'holaplex-wp');
+			$custom_text = '<div class="holaplex_custom_text"><p>'. $hidden_content_text .'</p></div>';
+		}
+		return $custom_text;
+	}
+
+	public function holaplex_excerpt_length() {
+		if (get_option("holaplex_excerpt_length")) {
+			$excerpt_length = get_option("holaplex_excerpt_length");
+		} else {
+			$excerpt_length = 45;
+		}
+		return $excerpt_length;
+	}
 
   public function send_graphql_request($query, $variables = [], $holaplex_api_key)
   {

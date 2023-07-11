@@ -125,7 +125,6 @@ class Holaplex_Wp_Admin
 
 		function add_drop_id_to_product_callback () {
 			// check nonce
-			global $post;
 			$nonce = isset($_REQUEST['_wpnonce']) ? sanitize_text_field($_REQUEST['_wpnonce']) : '';
 			if (!wp_verify_nonce($nonce, 'holaplex_sync_product_with_item')) {
 				wp_send_json_error(null, 500);
@@ -437,6 +436,14 @@ class Holaplex_Wp_Admin
 			$org_id = isset($_POST['holaplex_org_id']) ? sanitize_text_field($_POST['holaplex_org_id']) : '';
 			$project = isset($_POST['holaplex_project']) ? sanitize_text_field($_POST['holaplex_project']) : '';
 
+			$custom_text_field = isset($_POST['holaplex_custom_text']) ? wp_kses_post($_POST['holaplex_custom_text']) : '';
+			$excerpt_length_field = isset($_POST['holaplex_excerpt_length']) ? intval($_POST['holaplex_excerpt_length']) : '';
+			$fading_excerpt_info_field = isset($_POST['holaplex_fading_excerpt_info']) ? sanitize_key($_POST['holaplex_fading_excerpt_info']) : '';
+			
+			update_option('holaplex_custom_text', $custom_text_field);
+			update_option('holaplex_excerpt_length', $excerpt_length_field);
+			update_option('holaplex_fading_excerpt_info', $fading_excerpt_info_field);
+
 			update_option('holaplex_api_key', $api_key);
 			update_option('holaplex_project', $project);
 			update_option('holaplex_org_id', $org_id);
@@ -465,9 +472,6 @@ class Holaplex_Wp_Admin
 		add_action('wp_ajax_holaplex_disconnect', 'holaplex_disconnect_callback');
 		add_action('wp_ajax_nopriv_holaplex_disconnect', 'holaplex_disconnect_callback');
 	}
-
-
-
 
 	public function register_ajax_route()
 	{
@@ -547,6 +551,10 @@ class Holaplex_Wp_Admin
 			$holaplex_projects = $this->holaplex_projects;
 			$holaplex_status = $this->holaplex_status;
 
+			$core = new Holaplex_Core();
+			$holaplex_display_custom_text = $core->holaplex_display_custom_text();
+			$holaplex_excerpt_length = $core->holaplex_excerpt_length();
+
 			$project_drops = [];
 			foreach ($holaplex_projects as $project) {
 				foreach ($project['drops'] as $drop) {
@@ -560,13 +568,27 @@ class Holaplex_Wp_Admin
 			));
 
 
-			holaplex_woo_settings_page($holaplex_products, $holaplex_projects, $holaplex_status, $project_drops);
+			holaplex_woo_settings_page(
+				$holaplex_products, 
+				$holaplex_projects, 
+				$holaplex_status, 
+				$project_drops,
+				$holaplex_display_custom_text,
+				$holaplex_excerpt_length
+			);
 		});
 
 		add_action('woocommerce_update_options_holaplex_settings', 'holaplex_woo_save_settings');
 
 
-		function holaplex_woo_settings_page($holaplex_products, $holaplex_projects, $holaplex_status, $project_drops)
+		function holaplex_woo_settings_page(
+			$holaplex_products, 
+			$holaplex_projects, 
+			$holaplex_status, 
+			$project_drops,
+			$holaplex_display_custom_text,
+			$holaplex_excerpt_length
+			)
 		{
 
 			// check if there's an existing product with this dropid.
@@ -605,9 +627,24 @@ class Holaplex_Wp_Admin
 
 		function holaplex_woo_save_settings()
 		{
+
+			$nonce = isset($_REQUEST['_wpnonce']) ? sanitize_text_field($_REQUEST['_wpnonce']) : '';
+			if (!wp_verify_nonce($nonce, 'holaplex_sync_product_with_item')) {
+				wp_send_json_error(null, 500);
+			}
+
 			$api_key = isset($_POST['holaplex_api_key']) ? sanitize_text_field($_POST['holaplex_api_key']) : '';
 			$org_id = isset($_POST['holaplex_org_id']) ? sanitize_text_field($_POST['holaplex_org_id']) : '';
 			$project = isset($_POST['holaplex_project']) ? sanitize_text_field($_POST['holaplex_project']) : '';
+
+			$custom_text_field = isset($_REQUEST['holaplex_custom_text']) ? wp_kses_post($_REQUEST['holaplex_custom_text']) : '';
+			$excerpt_length_field = isset($_REQUEST['holaplex_excerpt_length']) ? intval($_REQUEST['holaplex_excerpt_length']) : '';
+			$fading_excerpt_info_field = isset($_REQUEST['holaplex_fading_excerpt_info']) ? sanitize_key($_REQUEST['holaplex_fading_excerpt_info']) : '';
+
+
+			update_option('holaplex_custom_text', $custom_text_field);
+			update_option('holaplex_excerpt_length', $excerpt_length_field);
+			update_option('holaplex_fading_excerpt_info', $fading_excerpt_info_field);
 
 			update_option('holaplex_api_key', $api_key);
 			update_option('holaplex_project', $project);
@@ -616,4 +653,6 @@ class Holaplex_Wp_Admin
 			header("Refresh:0");
 		}
 	}
+
+
 }

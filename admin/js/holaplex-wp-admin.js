@@ -6,7 +6,7 @@
 jQuery(document).ready(function ($) {
 	// Get the current URL hash and show the corresponding tab
 	let currentHash = window.location.hash;
-	if (currentHash && currentHash == '#holaplex-setup' || currentHash == '#holaplex-drops') {
+	if (currentHash && currentHash == '#holaplex-setup' || currentHash == '#holaplex-drops' || currentHash == '#holaplex-gate') {
 		showTab(currentHash);
 	} else {
 		currentHash = '#holaplex-setup'

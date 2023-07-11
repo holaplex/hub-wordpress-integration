@@ -53,12 +53,9 @@ class Holaplex_Wp_Public
 
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
-
-		$this->init_create_customer_wallet_callback();
-		$this->init_create_new_wallet_callback();
-		$this->init_remove_customer_wallet_callback();
 		$this->mint_drop_on_order_complete();
 		$this->init_display_nft_tab_on_my_account();
+		$this->init_replace_post_content();
 	}
 
 	/**
@@ -218,137 +215,6 @@ class Holaplex_Wp_Public
 		add_action('woocommerce_payment_complete_order_status', 'on_order_complete', 10, 2);
 	}
 
-
-	public function show_drop_after_product_meta()
-	{
-		function show_drop_after_product_meta()
-		{
-			global $post;
-			$drop_id = get_post_meta($post->ID, 'holaplex_drop_id', true);
-			if ($drop_id && $drop_id !== '') {
-				echo '<div class="holaplex-drop-id">Holaplex Drop: ' . $drop_id . '</div>';
-			}
-		}
-		add_action('woocommerce_product_meta_end', 'show_drop_after_product_meta');
-	}
-
-	public function init_create_customer_wallet_callback()
-	{
-		function create_customer_wallet_callback()
-		{
-			// Call your create_customer_wallet function here
-			$create_customer_query = <<<'EOT'
-				mutation CreateCustomer($input: CreateCustomerInput!) {
-					createCustomer(input: $input) {
-						customer {
-							id
-						}
-					}
-				}
-				EOT;
-
-			$create_customer_variables = [
-				'input' => [
-					'project' => get_option('holaplex_project'),
-				],
-			];
-			$core = new Holaplex_Core();
-			$response = $core->send_graphql_request($create_customer_query, $create_customer_variables, get_option('holaplex_api_key'));
-
-			// save customer_id to user meta
-			$current_user = get_current_user_id();
-			$customer_id = $response['data']['createCustomer']['customer']['id'];
-
-			update_user_meta($current_user, 'holaplex_customer_id', $customer_id);
-
-			$create_wallet_query = <<<'EOT'
-				mutation CreateCustomerWallet($input: CreateCustomerWalletInput!) {
-					createCustomerWallet(input: $input) {
-						wallet {
-							address
-						}
-					}
-				}
-				EOT;
-
-			$create_wallet_variables = [
-				'input' => [
-					'customer' => $customer_id,
-					"assetType" => "SOL"
-				],
-			];
-
-			$core = new Holaplex_Core();
-			$response = $core->send_graphql_request($create_wallet_query, $create_wallet_variables, get_option('holaplex_api_key'));
-
-
-			// Example response
-			$response = array('success' => true);
-
-			wp_send_json($response);
-		}
-		add_action('wp_ajax_create_customer_wallet', 'create_customer_wallet_callback');
-		add_action('wp_ajax_nopriv_create_customer_wallet', 'create_customer_wallet_callback');
-	}
-
-	public function init_create_new_wallet_callback()
-	{
-		function create_new_wallet_callback()
-		{
-
-
-			$current_user = wp_get_current_user();
-			$holaplex_customer_id = get_user_meta($current_user->ID, 'holaplex_customer_id', true);
-
-
-			$create_wallet_query = <<<'EOT'
-				mutation CreateCustomerWallet($input: CreateCustomerWalletInput!) {
-					createCustomerWallet(input: $input) {
-						wallet {
-							address
-						}
-					}
-				}
-				EOT;
-
-			$create_wallet_variables = [
-				'input' => [
-					'customer' => $holaplex_customer_id,
-					"assetType" => "SOL"
-				],
-			];
-
-			$core = new Holaplex_Core();
-			$response = $core->send_graphql_request($create_wallet_query, $create_wallet_variables, get_option('holaplex_api_key'));
-
-			// Example response
-			$response = array('success' => true);
-
-			wp_send_json($response);
-		}
-		add_action('wp_ajax_create_new_wallet', 'create_new_wallet_callback');
-		add_action('wp_ajax_nopriv_create_new_wallet', 'create_new_wallet_callback');
-	}
-
-	public function init_remove_customer_wallet_callback()
-	{
-		function remove_customer_wallet_callback()
-		{
-
-			// save customer_id to user meta
-			$current_user = get_current_user_id();
-
-			update_user_meta($current_user, 'holaplex_customer_id', '');
-
-			// Example response
-			$response = array('success' => true);
-
-			wp_send_json($response);
-		}
-		add_action('wp_ajax_remove_customer_wallet', 'remove_customer_wallet_callback');
-		add_action('wp_ajax_nopriv_remove_customer_wallet', 'remove_customer_wallet_callback');
-	}
-
 	public function init_display_nft_tab_on_my_account()
 	{
 		add_action('init', 'register_new_item_endpoint');
@@ -395,7 +261,7 @@ class Holaplex_Wp_Public
 			return $items;
 		}
 
-		add_action('woocommerce_account_'. HOLAPLEX_MY_ACCOUNT_ENDPOINT .'_endpoint', 'holaplex_add_new_item_content');
+		add_action('woocommerce_account_' . HOLAPLEX_MY_ACCOUNT_ENDPOINT . '_endpoint', 'holaplex_add_new_item_content');
 
 		/**
 		 * Add content to the new tab.
@@ -406,5 +272,53 @@ class Holaplex_Wp_Public
 		{
 			include_once HOLAPLEX_PLUGIN_PATH . 'public/partials/holaplex-wp-public-my-account.php';
 		}
+	}
+
+	public function init_replace_post_content()
+	{
+		/**
+		 * swap content of the entry
+		 */
+		function holaplex_replace_post_content($content)
+		{
+			global $post;
+			$product_id = $post->holaplex_product_select;
+			$current_user = wp_get_current_user();
+			$core = new Holaplex_Core();
+			$custom_text = $core->holaplex_display_custom_text();
+
+			// fading excerpt preview
+			if (get_option("holaplex_fading_excerpt_info")) {
+				if ('show_fading_excerpt' === get_option("holaplex_fading_excerpt_info")) {
+					$fading_excerpt = " fading-excerpt";
+				} else {
+					$fading_excerpt = "";
+				}
+			} else {
+				$fading_excerpt = " fading-excerpt";
+			}
+
+			// length of content preview
+			$excerpt_length = $core->holaplex_excerpt_length();
+
+			if (!current_user_can('administrator')) {
+				if (!$product_id || !wc_customer_bought_product($current_user->email, $current_user->ID, $product_id)) {
+					if ($post->holaplex_meta_info === 'hide_default_meta') {
+						$content = $custom_text;
+					} elseif ($post->holaplex_meta_info === 'hide_excerpt_meta') {
+						if ($post->post_excerpt) {
+							$content = $post->post_excerpt;
+							$content = '<div class="holaplex_hidden_excerpt' . $fading_excerpt . '">' . $content . '</div>' . $custom_text;
+						} else {
+							$content = wp_trim_words($post->post_content, $excerpt_length, '...');
+							$content = '<div class="holaplex_hidden_excerpt' . $fading_excerpt . '">' . $content . '</div>' . $custom_text;
+						}
+					}
+				}
+			}
+			return $content;
+		}
+
+		add_filter('the_content', 'holaplex_replace_post_content');
 	}
 }
