@@ -5,24 +5,26 @@
 class Holaplex_Core
 {
 
-	public function holaplex_display_custom_text () {
-		if (get_option("holaplex_custom_text")) {
-			$custom_text = get_option("holaplex_custom_text");
-		} else {
-			$hidden_content_text = __('Purchase this item to view this hidden content', 'holaplex-wp');
-			$custom_text = '<div class="holaplex_custom_text"><p>'. $hidden_content_text .'</p></div>';
-		}
-		return $custom_text;
-	}
+  public function holaplex_display_custom_text()
+  {
+    if (get_option("holaplex_custom_text")) {
+      $custom_text = get_option("holaplex_custom_text");
+    } else {
+      $hidden_content_text = __('Purchase this item to view this hidden content', 'holaplex-wp');
+      $custom_text = '<div class="holaplex_custom_text"><p>' . $hidden_content_text . '</p></div>';
+    }
+    return $custom_text;
+  }
 
-	public function holaplex_excerpt_length() {
-		if (get_option("holaplex_excerpt_length")) {
-			$excerpt_length = get_option("holaplex_excerpt_length");
-		} else {
-			$excerpt_length = 45;
-		}
-		return $excerpt_length;
-	}
+  public function holaplex_excerpt_length()
+  {
+    if (get_option("holaplex_excerpt_length")) {
+      $excerpt_length = get_option("holaplex_excerpt_length");
+    } else {
+      $excerpt_length = 45;
+    }
+    return $excerpt_length;
+  }
 
   public function send_graphql_request($query, $variables = [], $holaplex_api_key)
   {
@@ -155,7 +157,7 @@ class Holaplex_Core
 
     // Example response
     $response = array(
-      'customer_id' => $customer_id, 
+      'customer_id' => $customer_id,
       'wallet_address' => $wallet_address
     );
 
@@ -164,5 +166,47 @@ class Holaplex_Core
     return $response;
   }
 
+  public function get_customer_nfts()
+  {
 
+    $holaplex_api = new Holaplex_Core();
+    $holaplex_api_key = get_option('holaplex_api_key');
+    $holaplex_customer_wallet_addresses = get_option('holaplex_customer_id');
+
+    $get_customer_variables = [
+      'project' => '7bd9d730-0493-44ee-9098-56a9a9f9a410',
+      'customer' => '6b479ace-933c-4b4f-8cec-895b44307341',
+    ];
+
+    $get_customer_query = <<<'EOT'
+    query GetCustomerNfts($project: UUID!, $customer: UUID!) {
+        project(id: $project) {
+            id
+            customer(id: $customer) {
+                mints {
+                    id
+                    address
+                    createdAt
+                    collectionId
+                    collection {
+                        id
+                        blockchain
+                        metadataJson {
+                            id
+                            name
+                            description
+                            image
+                            externalUrl
+                            }
+                    }
+                }
+            }
+        }
+    }
+    EOT;
+
+    $response = $holaplex_api->send_graphql_request($get_customer_query, $get_customer_variables, $holaplex_api_key);
+
+    return $response;
+  }
 }

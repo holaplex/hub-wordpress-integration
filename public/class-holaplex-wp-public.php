@@ -56,6 +56,7 @@ class Holaplex_Wp_Public
 		$this->mint_drop_on_order_complete();
 		$this->init_display_nft_tab_on_my_account();
 		$this->init_replace_post_content();
+		$this->init_content_gate_redirect();
 	}
 
 	/**
@@ -261,7 +262,15 @@ class Holaplex_Wp_Public
 			return $items;
 		}
 
-		add_action('woocommerce_account_' . HOLAPLEX_MY_ACCOUNT_ENDPOINT . '_endpoint', 'holaplex_add_new_item_content');
+		$core = new Holaplex_Core();
+		$customer_nfts = $core->get_customer_nfts();
+
+		add_action('woocommerce_account_' . HOLAPLEX_MY_ACCOUNT_ENDPOINT . '_endpoint', function () use ($customer_nfts)
+		{
+
+			
+			include_once HOLAPLEX_PLUGIN_PATH . 'public/partials/holaplex-wp-public-my-account.php';
+		});
 
 		/**
 		 * Add content to the new tab.
@@ -270,6 +279,8 @@ class Holaplex_Wp_Public
 		 */
 		function holaplex_add_new_item_content()
 		{
+
+
 			include_once HOLAPLEX_PLUGIN_PATH . 'public/partials/holaplex-wp-public-my-account.php';
 		}
 	}
@@ -320,5 +331,31 @@ class Holaplex_Wp_Public
 		}
 
 		add_filter('the_content', 'holaplex_replace_post_content');
+	}
+
+	public function init_content_gate_redirect() {
+		/**
+		 * for redirect feature
+		 */
+		function holaplex_redirect() {
+			global $post;
+			if (!$post) {
+				return;
+			}
+			$product_id = $post->holaplex_product_select;
+			$selected_page = $post->holaplex_selected_page_id;
+			$current_user = wp_get_current_user();
+
+			if (!current_user_can('administrator')) {
+				if ( !$product_id || !wc_customer_bought_product($current_user->email, $current_user->ID, $product_id)) {
+					if (!is_home() && $selected_page && 'redirect_meta' === $post->holaplex_meta_info) {
+						$url = get_permalink($selected_page);
+						wp_redirect( $url );
+						exit;
+					}
+				}
+			}
+		}
+		add_action( 'template_redirect', 'holaplex_redirect' );		
 	}
 }

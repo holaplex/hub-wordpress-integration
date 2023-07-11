@@ -68,6 +68,9 @@ class Holaplex_Wp_Admin
 		$this->init_ajax_holaplex_disconnect();
 		$this->init_ajax_holaplex_connect();
 		$this->add_holaplex_menu_to_product_data_tabs();
+		$this->init_shortcode_handler();
+		$this->init_add_post_meta_options();
+		$this->init_add_post_content_gate_meta_box();
 	}
 
 	/**
@@ -120,10 +123,11 @@ class Holaplex_Wp_Admin
 		wp_localize_script('holaplex-ajax-admin', 'holaplex_wp_ajax', array('ajax_url' => admin_url('admin-ajax.php')));
 	}
 
-	public function init_ajax_sync_drop_id_with_product () 
+	public function init_ajax_sync_drop_id_with_product()
 	{
 
-		function add_drop_id_to_product_callback () {
+		function add_drop_id_to_product_callback()
+		{
 			// check nonce
 			$nonce = isset($_REQUEST['_wpnonce']) ? sanitize_text_field($_REQUEST['_wpnonce']) : '';
 			if (!wp_verify_nonce($nonce, 'holaplex_sync_product_with_item')) {
@@ -140,7 +144,6 @@ class Holaplex_Wp_Admin
 
 			update_post_meta($post_id, 'holaplex_drop_id', $drop_id);
 			update_post_meta($post_id, 'holaplex_project_id', $project_id);
-
 		}
 
 		add_action('wp_ajax_add_drop_id_to_product', 'add_drop_id_to_product_callback');
@@ -177,8 +180,8 @@ class Holaplex_Wp_Admin
 
 			$current_drop_id = get_post_meta(get_the_ID(), 'holaplex_drop_id', true);
 			$nonce = wp_create_nonce('holaplex_sync_product_with_item');
-			
-?>
+
+	?>
 
 			<div id="holaplex_menu_product_tab_content" class="panel woocommerce_options_panel">
 				<p class="form-field holaplex-status">
@@ -189,17 +192,17 @@ class Holaplex_Wp_Admin
 				<!-- show a drop down list of holaplex drops -->
 				<p class="holaplex_drop_id_field form-field">
 					<label for="_stock_status">Drops</label>
-					<span class="woocommerce-help-tip"></span> 
+					<span class="woocommerce-help-tip"></span>
 					<select style="" id="_holaplex_drop_project_ids" name="_holaplex_drop_project_id" class="select short">
 						<option value="">Select a drop</option>
-						<?php foreach ($project_drops as $drop) { 
-										$drop_id = $drop['id'];
-										$drop_name = $drop['collection']['metadataJson']['name'];
-										$collection_supply = $drop['collection']['supply'] - $drop['collection']['totalMints'];
-										$drop_status = $drop['status'];
-										$drop_project_id = $drop['project_id'];
+						<?php foreach ($project_drops as $drop) {
+							$drop_id = $drop['id'];
+							$drop_name = $drop['collection']['metadataJson']['name'];
+							$collection_supply = $drop['collection']['supply'] - $drop['collection']['totalMints'];
+							$drop_status = $drop['status'];
+							$drop_project_id = $drop['project_id'];
 						?>
-							
+
 							<option <?php echo esc_attr($current_drop_id) === $drop_id ? 'selected' : null; ?> value="<?php echo esc_attr("$drop_id|$drop_project_id"); ?>"><?php echo esc_html("🖼️$drop_name -Supply: $collection_supply -Status: $drop_status"); ?></option>
 						<?php } ?>
 					</select>
@@ -208,7 +211,7 @@ class Holaplex_Wp_Admin
 					<button data-wp-nonce="<?php echo esc_attr($nonce); ?>" type="button" class="button button-primary button-large" id="holaplex_tab_submit_data">Submit</button>
 				</p>
 			</div>
-			
+
 
 		<?php
 
@@ -439,7 +442,7 @@ class Holaplex_Wp_Admin
 			$custom_text_field = isset($_POST['holaplex_custom_text']) ? wp_kses_post($_POST['holaplex_custom_text']) : '';
 			$excerpt_length_field = isset($_POST['holaplex_excerpt_length']) ? intval($_POST['holaplex_excerpt_length']) : '';
 			$fading_excerpt_info_field = isset($_POST['holaplex_fading_excerpt_info']) ? sanitize_key($_POST['holaplex_fading_excerpt_info']) : '';
-			
+
 			update_option('holaplex_custom_text', $custom_text_field);
 			update_option('holaplex_excerpt_length', $excerpt_length_field);
 			update_option('holaplex_fading_excerpt_info', $fading_excerpt_info_field);
@@ -569,9 +572,9 @@ class Holaplex_Wp_Admin
 
 
 			holaplex_woo_settings_page(
-				$holaplex_products, 
-				$holaplex_projects, 
-				$holaplex_status, 
+				$holaplex_products,
+				$holaplex_projects,
+				$holaplex_status,
 				$project_drops,
 				$holaplex_display_custom_text,
 				$holaplex_excerpt_length
@@ -582,14 +585,13 @@ class Holaplex_Wp_Admin
 
 
 		function holaplex_woo_settings_page(
-			$holaplex_products, 
-			$holaplex_projects, 
-			$holaplex_status, 
+			$holaplex_products,
+			$holaplex_projects,
+			$holaplex_status,
 			$project_drops,
 			$holaplex_display_custom_text,
 			$holaplex_excerpt_length
-			)
-		{
+		) {
 
 			// check if there's an existing product with this dropid.
 			// show a button to sync if there is, else show a button to import
@@ -622,7 +624,7 @@ class Holaplex_Wp_Admin
 				include_once(HOLAPLEX_PLUGIN_PATH . 'admin/partials/holaplex-wp-admin-container.php');
 				?>
 				<div class="clear"></div>
-	<?php
+			<?php
 		}
 
 		function holaplex_woo_save_settings()
@@ -654,5 +656,147 @@ class Holaplex_Wp_Admin
 		}
 	}
 
+	public function init_shortcode_handler()
+	{
+		/**
+		 * shortcode to display content only if the user has purchased the product with required ID
+		 */
+		function holaplex_show_content($atts = [], $content = null)
+		{
+			global $post;
+			$atts = array_change_key_case((array) $atts, CASE_LOWER);
+			$core = new Holaplex_Core();
 
+			$output = '';
+			$output .= '<div class="holaplex-box">';
+
+			$current_user = wp_get_current_user();
+
+			if (current_user_can('administrator') || wc_customer_bought_product($current_user->email, $current_user->ID, $atts['id'])) {
+
+				// // if the selected product id for the snippet option is different from the product id in the shortcode
+				if (!current_user_can('administrator') && $post->holaplex_product_select && $post->holaplex_meta_info && 'hide_excerpt_meta' === $post->holaplex_meta_info && $atts['id'] !== $post->holaplex_product_select) {
+					$custom_text = $core->holaplex_display_custom_text();
+					$output .= $custom_text;
+				} else {
+					if (!is_null($content)) {
+						// protects output via content variable
+						$output .= apply_filters('the_content', $content);
+					}
+				}
+			} else {
+				// if user has not purchased product & is not admin
+				$custom_text = $core->holaplex_display_custom_text();
+				$output .= $custom_text;
+			}
+
+			$output .= '</div>';
+
+			return $output;
+		}
+
+
+		function holaplex_shortcodes_init()
+		{
+			add_shortcode('holaplexcode', 'holaplex_show_content');
+		}
+
+		add_action('init', 'holaplex_shortcodes_init');
+	}
+
+	public function init_add_post_content_gate_meta_box()
+	{
+		add_action('add_meta_boxes', 'holaplex_post_options_metabox');
+
+		add_action('admin_init', 'holaplex_post_options_metabox', 1);
+		/**
+		 *  adding our custom fields
+		 *
+		 */
+		function holaplex_post_options_metabox()
+		{
+			add_meta_box('post_options', __('Holaplex Content Gate options', 'holaplex-wp'), 'holaplex_post_options_code', array('post', 'page'), 'normal', 'high');
+		}
+
+		/**
+		 *  Display field options
+		 */
+		function holaplex_post_options_code($post)
+		{
+
+			include_once(HOLAPLEX_PLUGIN_PATH . 'admin/partials/holaplex-wp-admin-post-meta.php');
+
+		}
+
+
+		/**
+		 * dropdown list with selection of products available
+		 */
+		function holaplex_products_dropdown($post)
+		{
+
+			$holaplex_products =  wc_get_products(array(
+				'holaplex_drop_id' => 'EXISTS'
+			));
+
+			if (!empty($holaplex_products)) {
+				echo '<select multiple style="" id="_holaplex_drop_products_ids" name="_holaplex_drop_products_ids" class="select short">';
+
+				foreach ($holaplex_products as $product) {
+					// $nonce = wp_create_nonce(HOLAPLEX_NONCE);
+					$holaplex_drop_id = $product->get_meta('holaplex_drop_id');
+					$holaplex_project_id = $product->get_meta('holaplex_project_id');
+
+					?>
+					<option value="<?php echo esc_attr($product->get_id()); ?>"><?php echo esc_html($product->get_name()); ?></option>
+					<?php
+					
+				}
+				echo '</select>';
+			} else  {
+				echo '<option value="">No drops</option>';
+			}
+		}
+	}
+
+	public function init_add_post_meta_options()
+	{
+		add_action('save_post', 'holaplex_save_post_options');
+
+		function holaplex_save_post_options($post_id)
+		{
+			if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+				return;
+			}
+
+
+			$post_type = isset($_POST['post_type']) ? sanitize_text_field($_POST['post_type']) : '';
+			$noncename = $post_type . '_noncename';
+			$nonce = isset($_POST[$noncename]) ? sanitize_text_field($_POST[$noncename]) : '';
+
+			// verify it's coming from the right place
+			if (!wp_verify_nonce($nonce, HOLAPLEX_NONCE)) {
+				return;
+			}
+
+			// // check if they have permissions
+			if (!current_user_can('edit_post', $post_id)) {
+				return;
+			}
+			// if authorized, finding and saving the data
+			if ('post' === $_POST['post_type'] || 'page' === $_POST['post_type']) {
+				if (!current_user_can('edit_post', $post_id)) {
+					return;
+				} else {
+					$meta_info_field = isset($_POST['holaplex_meta_info']) ? sanitize_key($_POST['holaplex_meta_info']) : '';
+					$product_select_field = isset($_POST['holaplex_product_select']) ? sanitize_text_field($_POST['holaplex_product_select']) : '';
+					$selected_page_id_field = isset($_POST['holaplex_selected_page_id']) ? sanitize_text_field($_POST['holaplex_selected_page_id']) : '';
+
+					update_post_meta($post_id, 'holaplex_meta_info', $meta_info_field);
+					update_post_meta($post_id, 'holaplex_product_select', $product_select_field);
+					update_post_meta($post_id, 'holaplex_selected_page_id', $selected_page_id_field);
+				}
+			}
+		}
+	}
 }

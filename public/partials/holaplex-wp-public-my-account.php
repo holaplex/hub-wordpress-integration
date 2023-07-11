@@ -16,49 +16,7 @@
 <?php
 
 
-function get_customer_nfts()
-{
 
-  $holaplex_api = new Holaplex_Core();
-  $holaplex_api_key = get_option('holaplex_api_key');
-  $holaplex_customer_wallet_addresses = get_option('holaplex_customer_id');
-
-  $get_customer_variables = [
-    'project' => '7bd9d730-0493-44ee-9098-56a9a9f9a410',
-    'customer' => '6b479ace-933c-4b4f-8cec-895b44307341',
-  ];
-
-  $get_customer_query = <<<'EOT'
-    query GetCustomerNfts($project: UUID!, $customer: UUID!) {
-        project(id: $project) {
-            id
-            customer(id: $customer) {
-                mints {
-                    id
-                    address
-                    createdAt
-                    collectionId
-                    collection {
-                        id
-                        blockchain
-                        metadataJson {
-                            id
-                            name
-                            description
-                            image
-                            externalUrl
-                            }
-                    }
-                }
-            }
-        }
-    }
-    EOT;
-
-  $response = $holaplex_api->send_graphql_request($get_customer_query, $get_customer_variables, $holaplex_api_key);
-
-  return $response;
-}
 
 ?>
 
@@ -69,7 +27,6 @@ function get_customer_nfts()
   <h4>My NFTs</h4>
   <?php
   
-  $customer_nfts = get_customer_nfts();
   $nfts = $customer_nfts['data']['project']['customer']['mints'];
   
   // if no nfts, show message
