@@ -27,7 +27,7 @@
   <h4>My NFTs</h4>
   <?php
   
-  $nfts = $customer_nfts['data']['project']['customer']['mints'];
+  $nfts = isset($customer_nfts) && $customer_nfts ? $customer_nfts['data']['project']['customer']['mints'] : [];
   
   // if no nfts, show message
   if (empty($nfts)) {

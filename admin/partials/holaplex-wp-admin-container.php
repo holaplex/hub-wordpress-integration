@@ -87,9 +87,9 @@
             <div class="col-md-8">
               <ul class="responsive-table">
                 <li class="table-header">
-                  <div class="col-2">Name</div>
+                  <div class="col-3">Name</div>
                   <div class="col-1">Supply</div>
-                  <div class="col-1">Status</div>
+                  <div class="col-2">Status</div>
                   <div class="col-2">Import</div>
                 </li>
                 <?php
@@ -108,9 +108,9 @@
                     echo "<li class='table-row'>";
                     echo "<div class='col-3'>
                         <a target='_blank' href='" . esc_url("https://hub.holaplex.com/projects/$holaplex_project_id/drops/$holaplex_drop_id/mints") . "'>" . esc_html($drop_name) .
-                      "</a><br /> <p class='product-name'>Product: " . esc_html($product->get_name()) . "</p></div>";
+                      "</a><br /> <p class='product-name'>Product: <a href='".esc_url($product->get_permalink())."'>" . esc_html($product->get_name()) . "</a></p></div>";
                     echo "<div class='col-1'>" . esc_html($collection_supply) . "</div>";
-                    echo "<div class='col-1'>" . esc_html($drop_status) . "</div>";
+                    echo "<div class='col-2'>" . esc_html($drop_status) . "</div>";
                     echo "<div class='col-2'><button data-product-id='" . esc_attr($product->get_id()) . "' data-wp-nonce='" . esc_attr($nonce) . "' class='btn btn-remove'>Remove</button></div>";
                     echo "</li>";
                   }

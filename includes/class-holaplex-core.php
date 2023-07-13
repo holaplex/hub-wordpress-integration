@@ -64,15 +64,23 @@ class Holaplex_Core
 
     $response_code = wp_remote_retrieve_response_code($response);
     $response_body = wp_remote_retrieve_body($response);
+    var_dump($response_code);
+    // var_dump($response_body);
+    // wp_die();
     // Handle the response
-    if ($response_code === 200) {
+    if ((int)$response_code === 200) {
+      
       // Successful response
       $data = json_decode($response_body, true);
       return $data;
     } else {
+      var_dump($variables);
+      var_dump($holaplex_api_key);
+      
       // Error response
       // Handle the error
       if (is_admin()) {
+
         add_action('admin_notices', function () {
           $class = 'notice notice-error';
           $message = __('There’s a problem with the Organization ID or API Token that you’ve entered. Please update these values.', 'holaplex-wp');
@@ -206,7 +214,8 @@ class Holaplex_Core
     EOT;
 
     $response = $holaplex_api->send_graphql_request($get_customer_query, $get_customer_variables, $holaplex_api_key);
-
+    var_dump($response);
+    // wp_die();
     return $response;
   }
 }
