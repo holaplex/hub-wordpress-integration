@@ -26,14 +26,15 @@
   <!-- This file should primarily consist of HTML with a little bit of PHP. -->
   <h4>My NFTs</h4>
   <?php
-  
-  $nfts = isset($customer_nfts) && $customer_nfts ? $customer_nfts['data']['project']['customer']['mints'] : [];
-  
-  // if no nfts, show message
-  if (empty($nfts)) {
-    echo '<p>You have no NFTs yet.</p>';
-    return;
-  }
+
+    $core = new Holaplex_Core();
+    $customer_nfts = $core->get_customer_nfts();
+    $nfts = isset($customer_nfts) && !empty($customer_nfts) ? $customer_nfts['data']['project']['customer']['mints'] : [];
+
+    if (empty($nfts)) {
+      echo '<p>You have no NFTs yet.</p>';
+      return;
+    }
   
   ?>
   

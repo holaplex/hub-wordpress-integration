@@ -560,6 +560,9 @@ class Holaplex_Wp_Admin
 
 			$project_drops = [];
 			foreach ($holaplex_projects as $project) {
+				if (!isset($project['drops']) || empty($project['drops'])	) {
+					continue;
+				}
 				foreach ($project['drops'] as $drop) {
 					$project_drops[$drop['id']] = $drop;
 				}

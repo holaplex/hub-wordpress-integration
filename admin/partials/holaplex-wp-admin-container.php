@@ -108,7 +108,7 @@
                     echo "<li class='table-row'>";
                     echo "<div class='col-3'>
                         <a target='_blank' href='" . esc_url("https://hub.holaplex.com/projects/$holaplex_project_id/drops/$holaplex_drop_id/mints") . "'>" . esc_html($drop_name) .
-                      "</a><br /> <p class='product-name'>Product: <a href='".esc_url($product->get_permalink())."'>" . esc_html($product->get_name()) . "</a></p></div>";
+                      "</a><br /> <p class='product-name'>Product: <a href='".esc_url( get_edit_post_link( $product->get_id() ) )."'>" . esc_html($product->get_name()) . "</a></p></div>";
                     echo "<div class='col-1'>" . esc_html($collection_supply) . "</div>";
                     echo "<div class='col-2'>" . esc_html($drop_status) . "</div>";
                     echo "<div class='col-2'><button data-product-id='" . esc_attr($product->get_id()) . "' data-wp-nonce='" . esc_attr($nonce) . "' class='btn btn-remove'>Remove</button></div>";

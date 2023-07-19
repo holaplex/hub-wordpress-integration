@@ -262,10 +262,8 @@ class Holaplex_Wp_Public
 			return $items;
 		}
 
-		$core = new Holaplex_Core();
-		$customer_nfts = $core->get_customer_nfts();
 
-		add_action('woocommerce_account_' . HOLAPLEX_MY_ACCOUNT_ENDPOINT . '_endpoint', function () use ($customer_nfts)
+		add_action('woocommerce_account_' . HOLAPLEX_MY_ACCOUNT_ENDPOINT . '_endpoint', function ()
 		{
 
 			
