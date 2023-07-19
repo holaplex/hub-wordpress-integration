@@ -97,9 +97,20 @@
                 // if $holaplex_products is not empty show the products, else show message
                 if (!empty($holaplex_products)) {
                   foreach ($holaplex_products as $product) {
+
                     $nonce = wp_create_nonce(HOLAPLEX_NONCE);
                     $holaplex_drop_id = $product->get_meta('holaplex_drop_id');
                     $holaplex_project_id = $product->get_meta('holaplex_project_id');
+                    // get all project ids 
+                    $project_ids = array_map(function ($project) {
+                      return $project['id'];
+                    }, $holaplex_projects);
+
+                    // check if holaplex_project_id is in project_ids
+                    if (!in_array($holaplex_project_id, $project_ids)) {
+                      continue;
+                    } 
+
                     $drop = $project_drops[$holaplex_drop_id];
                     $drop_name = $drop['collection']['metadataJson']['name'];
                     $collection_supply = $drop['collection']['supply'] - $drop['collection']['totalMints'];
