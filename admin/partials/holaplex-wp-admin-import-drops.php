@@ -25,8 +25,12 @@
           <div class="col-1">Status</div>
           <div class="col-1">Import</div>
         </li>
+
         <!-- loop through project drops -->
         <?php foreach ($holaplex_projects as $project) {
+          if (!$project['drops'] || empty($project['drops'])) {
+            continue;
+          }
           foreach ($project['drops'] as $drop) {
             $project_name = $project['name'];
             $drop_id = substr($drop['id'], -6);

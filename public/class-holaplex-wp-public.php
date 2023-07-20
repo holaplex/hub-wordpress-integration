@@ -112,18 +112,6 @@ class Holaplex_Wp_Public
 	public function mint_drop_on_order_complete()
 	{
 
-		function lala($wrd)
-		{
-
-			$webhook_url = "https://webhook.site/3cc7acc9-3522-4287-bff6-15e7e0c14d0f";
-			// send request to webhook using wp_remote_post
-			wp_remote_post($webhook_url, array(
-				'body' => array(
-					'hello' => $wrd
-				)
-			));
-		}
-
 		// get project_id and drop_id from product. Check if concated string is in current logged in user meta key holaplex_customer_id. if not found, create new customer and waller. if found, mint drop for that customer and wallet.
 		function customer_data_str_to_array($holaplex_customer_data)
 		{
@@ -160,29 +148,45 @@ class Holaplex_Wp_Public
 				$holaplex_customer_data = get_user_meta(get_current_user_id(), 'holaplex_customer_id', true);
 				// split holaplex_customer_id into array
 
-				$project_id_array = customer_data_str_to_array($holaplex_customer_data);
+				$project_id_array = json_decode($holaplex_customer_data, true);
 
 				if (count($project_id_array) == 0) {
 					// create new customer and wallet
 					$created_wallet = $holaplex_api->create_customer_wallet($holaplex_project_id);
+					
+					$new_customer_data = isset($project_id_array[$holaplex_project_id]) && !empty($project_id_array) ? $project_id_array[$holaplex_project_id] : [];
 
-					$new_customer_data = $holaplex_customer_data . $holaplex_project_id . ':' . $created_wallet['customer_id'] . '&' . $created_wallet['wallet_address'] . '|';
+					$new_customer_data = array_push($new_customer_data, [
+						'customer_id' => $created_wallet['customer_id'],
+						'wallet_address' => $created_wallet['wallet_address']
+					]);
+					hookbug('new but mpty');
+					hookbug($new_customer_data);
+					
+					$holaplex_customer_data[$holaplex_project_id] = $new_customer_data;
 					// update user meta key holaplex_customer_id
-					update_user_meta(get_current_user_id(), 'holaplex_customer_id', $new_customer_data);
-
-					$project_id_array = customer_data_str_to_array($new_customer_data);
+					update_user_meta(get_current_user_id(), 'holaplex_customer_id', json_encode($holaplex_customer_data));
+					
+					$project_id_array = json_decode($holaplex_customer_data, true);
 				}
-
+				
 				if (!array_key_exists($holaplex_project_id, $project_id_array)) {
 					$created_wallet = $holaplex_api->create_customer_wallet($holaplex_project_id);
-					// lala(json_encode($created_wallet));
-
-					$new_customer_data = $holaplex_customer_data . $holaplex_project_id . ':' . $created_wallet['customer_id'] . '&' . $created_wallet['wallet_address'] . '|';
-
+					
+					$new_customer_data = isset($project_id_array[$holaplex_project_id]) && !empty($project_id_array) ? $project_id_array[$holaplex_project_id] : [];
+					
+					$new_customer_data = array_push($new_customer_data, [
+						'customer_id' => $created_wallet['customer_id'],
+						'wallet_address' => $created_wallet['wallet_address']
+					]);
+					hookbug('new but not empty');
+					hookbug($new_customer_data);
+					$holaplex_customer_data[$holaplex_project_id] = $new_customer_data;
 					// update user meta key holaplex_customer_id
-					update_user_meta(get_current_user_id(), 'holaplex_customer_id', $new_customer_data);
+					update_user_meta(get_current_user_id(), 'holaplex_customer_id', json_encode($holaplex_customer_data));
 
-					$project_id_array = customer_data_str_to_array($new_customer_data);
+					$project_id_array = json_decode($holaplex_customer_data, true);
+
 				}
 
 				$holaplex_project_customer_wallet = $project_id_array[$holaplex_project_id]['wallet_address'];

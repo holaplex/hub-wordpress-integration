@@ -33,6 +33,16 @@
                 </td>
               </tr>
               <tr valign="top">
+                <th scope="row"><?php _e('Credits', 'holaplex-wp'); ?></th>
+                <td>
+                  <div class="row">
+                    <div class="col-6">
+                      <?php echo esc_html($holaplex_credits); ?>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <tr valign="top">
                 <th scope="row"><?php _e('Organization Id', 'holaplex-wp'); ?></th>
                 <td>
                   <input type="text" name="holaplex_org_id" value="<?php echo esc_attr(get_option('holaplex_org_id')); ?>">

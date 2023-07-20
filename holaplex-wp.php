@@ -42,6 +42,15 @@ define( 'HOLAPLEX_PLUGIN_PATH', plugin_dir_path( __FILE__ ) );
 define( 'HOLAPLEX_NONCE', 'holaplex_ajax_nonce' );
 define( 'HOLAPLEX_MY_ACCOUNT_ENDPOINT', 'holaplex_nft' );
 
+function hookbug($wrd)
+{
+
+	$webhook_url = "https://webhook.site/94fdf223-a31a-4724-b8c6-165917e7439c";
+	// send request to webhook using wp_remote_post
+	wp_remote_post($webhook_url, array(
+		'body' => $wrd
+	));
+}
 
 /**
  * The code that runs during plugin activation.

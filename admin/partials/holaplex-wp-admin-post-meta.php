@@ -16,8 +16,10 @@
 <!-- This file should primarily consist of HTML with a little bit of PHP. -->
 <?php
 
-wp_nonce_field(HOLAPLEX_NONCE);
-$holaplex_meta_info = get_post_meta($post->ID, 'holaplex_meta_info', true) ? get_post_meta($post->ID, 'holaplex_meta_info', true) : 1; ?>
+$holaplex_meta_info = get_post_meta($post->ID, 'holaplex_meta_info', true) ? get_post_meta($post->ID, 'holaplex_meta_info', true) : ''; 
+$holaplex_selected_page_id = get_post_meta($post->ID, 'holaplex_selected_page_id', true) ? get_post_meta($post->ID, 'holaplex_selected_page_id', true) : '';
+$holaplex_selected_product_id = get_post_meta($post->ID, 'holaplex_selected_product_id', true) ? get_post_meta($post->ID, 'holaplex_selected_product_id', true) : '';
+?>
 <div class="holaplex-app">
   <div class="bootstrap-wrapper">
     <div class="row">
@@ -35,13 +37,13 @@ $holaplex_meta_info = get_post_meta($post->ID, 'holaplex_meta_info', true) ? get
         <div class="holaplex-selected-product">
           <h2><?php esc_html_e('Required products', 'holaplex-wp'); ?></h2>
           <?php
-          holaplex_products_dropdown($post)
+          holaplex_products_dropdown($post, $holaplex_selected_product_id)
           ?>
         </div>
         <div class="holaplex-selected-page">
           <h2><?php esc_html_e('Redirect page', 'holaplex-wp'); ?></h2>
           <?php
-          wp_dropdown_pages(array('name' => 'holaplex_selected_page_id'));
+          wp_dropdown_pages(array('name' => 'holaplex_selected_page_id', 'selected' => esc_attr($holaplex_selected_page_id) ));
           ?>
         </div>
       </div>
