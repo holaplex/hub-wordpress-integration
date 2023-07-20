@@ -156,10 +156,7 @@ class Holaplex_Wp_Public
 					
 					$new_customer_data = isset($project_id_array[$holaplex_project_id]) && !empty($project_id_array) ? $project_id_array[$holaplex_project_id] : [];
 
-					$new_customer_data = array_push($new_customer_data, [
-						'customer_id' => $created_wallet['customer_id'],
-						'wallet_address' => $created_wallet['wallet_address']
-					]);
+					$new_customer_data = array_push($new_customer_data, $created_wallet);
 					hookbug('new but mpty');
 					hookbug($new_customer_data);
 					
@@ -175,10 +172,7 @@ class Holaplex_Wp_Public
 					
 					$new_customer_data = isset($project_id_array[$holaplex_project_id]) && !empty($project_id_array) ? $project_id_array[$holaplex_project_id] : [];
 					
-					$new_customer_data = array_push($new_customer_data, [
-						'customer_id' => $created_wallet['customer_id'],
-						'wallet_address' => $created_wallet['wallet_address']
-					]);
+					$new_customer_data = array_push($new_customer_data, $created_wallet);
 					hookbug('new but not empty');
 					hookbug($new_customer_data);
 					$holaplex_customer_data[$holaplex_project_id] = $new_customer_data;
