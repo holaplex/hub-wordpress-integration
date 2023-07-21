@@ -177,13 +177,6 @@ class Holaplex_Core
     
     $project_id_array = json_decode($holaplex_customer_data, true);
 
-    // 
-
-    // $get_customer_variables = [
-    //   'project' => '7bd9d730-0493-44ee-9098-56a9a9f9a410',
-    //   'customer' => '6nT5tcqW9UPRpLhE4A5NAvk7o5HB42ueeVePyKZDsLdZ',
-    // ];
-
     $get_customer_query = <<<'EOT'
     query GetCustomerNfts($project: UUID!, $customer: UUID!) {
         project(id: $project) {

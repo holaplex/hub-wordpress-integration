@@ -30,8 +30,14 @@
     $core = new Holaplex_Core();
     $customer_nfts = $core->get_customer_nfts();
     $nfts = [];
-    foreach ($customer_nfts as $customer_nft) {
-      $nfts[] = isset($customer_nft) && !empty($customer_nft) ? $customer_nft['data']['project']['customer']['mints'] : [];
+    foreach ($customer_nfts as $customer_drop_list) {
+      // $nfts[] = isset($customer_drop_list) && !empty($customer_drop_list) ? $customer_drop_list['data']['project']['customer']['mints'] : [];
+      if (isset($customer_drop_list) && !empty($customer_drop_list) ) {
+        $mints = $customer_drop_list['data']['project']['customer']['mints'];
+        foreach($mints as $mint) {
+          $nfts[] = $mint;
+        }
+      }
     }
 
     if (empty($nfts)) {
@@ -47,9 +53,6 @@
       <div class="h-full flex flex-col flex-1">
         <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
           <?php foreach ($nfts as $nft) { ?>
-            <?php 
-                $nft = $nft[0];
-            ?>
             <div class="flex flex-col rounded-md p-6">
               <img class="rounded-md w-full aspect-square object-cover" src="<?php echo esc_attr($nft['collection']['metadataJson']['image']); ?>" alt="<?php echo esc_attr($nft['collection']['metadataJson']['name']); ?>">
               <div class="flex justify-between mt-4">

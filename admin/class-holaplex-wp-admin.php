@@ -247,7 +247,7 @@ class Holaplex_Wp_Admin
 				}
 				?>
 			</div>
-			
+
 		<?php
 
 		});
@@ -811,7 +811,7 @@ class Holaplex_Wp_Admin
 					return;
 				}
 
-				$post_type = isset($_POST['post_type']) ? sanitize_text_field($_POST['post_type']) : '';
+				$post_type = get_post_type($post_id);
 				$noncename = $post_type . '_noncename';
 				$nonce = isset($_POST[$noncename]) ? sanitize_text_field($_POST[$noncename]) : '';
 
@@ -825,7 +825,7 @@ class Holaplex_Wp_Admin
 					return;
 				}
 				// if authorized, finding and saving the data
-				if ('post' === $_POST['post_type'] || 'page' === $_POST['post_type']) {
+				if ('post' === $post_type || 'page' === $post_type) {
 					if (!current_user_can('edit_post', $post_id)) {
 						return;
 					} else {

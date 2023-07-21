@@ -22,6 +22,9 @@ $holaplex_selected_product_id = get_post_meta($post->ID, 'holaplex_selected_prod
 ?>
 <div class="holaplex-app">
   <div class="bootstrap-wrapper">
+    <?php 
+      wp_nonce_field(HOLAPLEX_NONCE);
+    ?>
     <div class="row">
       <div class="col-lg-4">
         <div class="alignleft">
