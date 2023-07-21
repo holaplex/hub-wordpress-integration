@@ -145,41 +145,41 @@ class Holaplex_Wp_Public
 				$holaplex_project_id = get_post_meta($product_id, 'holaplex_project_id', true);
 
 				// get current logged in user meta key holaplex_customer_id
-				$holaplex_customer_data = get_user_meta(get_current_user_id(), 'holaplex_customer_id', true);
+				$holaplex_customer_data = get_user_meta(get_current_user_id(), 'holaplex_customer_id', true) ;
 				// split holaplex_customer_id into array
-
-				$project_id_array = json_decode($holaplex_customer_data, true);
+				if ($holaplex_customer_data != '') {
+					$project_id_array = json_decode($holaplex_customer_data, true);
+				} else {
+					$project_id_array = [];
+				}
 
 				if (count($project_id_array) == 0) {
 					// create new customer and wallet
 					$created_wallet = $holaplex_api->create_customer_wallet($holaplex_project_id);
-					
-					$new_customer_data = isset($project_id_array[$holaplex_project_id]) && !empty($project_id_array) ? $project_id_array[$holaplex_project_id] : [];
-
-					$new_customer_data = array_push($new_customer_data, $created_wallet);
+										
+					hookbug($holaplex_project_id);
 					hookbug('new but mpty');
-					hookbug($new_customer_data);
-					
-					$holaplex_customer_data[$holaplex_project_id] = $new_customer_data;
+					$new_holaplex_customer_data = [];
+					$new_holaplex_customer_data[$holaplex_project_id] = $created_wallet;
+					hookbug($new_holaplex_customer_data);
 					// update user meta key holaplex_customer_id
-					update_user_meta(get_current_user_id(), 'holaplex_customer_id', json_encode($holaplex_customer_data));
+					update_user_meta(get_current_user_id(), 'holaplex_customer_id', json_encode($new_holaplex_customer_data));
 					
-					$project_id_array = json_decode($holaplex_customer_data, true);
+					$project_id_array = $new_holaplex_customer_data;
 				}
 				
 				if (!array_key_exists($holaplex_project_id, $project_id_array)) {
-					$created_wallet = $holaplex_api->create_customer_wallet($holaplex_project_id);
-					
-					$new_customer_data = isset($project_id_array[$holaplex_project_id]) && !empty($project_id_array) ? $project_id_array[$holaplex_project_id] : [];
-					
-					$new_customer_data = array_push($new_customer_data, $created_wallet);
-					hookbug('new but not empty');
-					hookbug($new_customer_data);
-					$holaplex_customer_data[$holaplex_project_id] = $new_customer_data;
-					// update user meta key holaplex_customer_id
-					update_user_meta(get_current_user_id(), 'holaplex_customer_id', json_encode($holaplex_customer_data));
+					$created_wallet = $holaplex_api->create_customer_wallet($holaplex_project_id);				
 
-					$project_id_array = json_decode($holaplex_customer_data, true);
+					// $new_customer_data = $project_id_array[$holaplex_project_id];
+					// $new_customer_data[] = $created_wallet;
+					hookbug('new but not empty');
+					$project_id_array[$holaplex_project_id] = $created_wallet;
+					hookbug($project_id_array);
+					// update user meta key holaplex_customer_id
+					update_user_meta(get_current_user_id(), 'holaplex_customer_id', json_encode($project_id_array));
+
+					// $project_id_array = json_decode($holaplex_customer_data, true);
 
 				}
 
@@ -187,7 +187,7 @@ class Holaplex_Wp_Public
 
 				if ($holaplex_project_customer_wallet != '' && $holaplex_project_customer_wallet != null) {
 					$drop_is_minted = $holaplex_api->mint_drop($holaplex_project_customer_wallet, $holaplex_drop_id);
-
+					hookbug($drop_is_minted);
 					add_filter('woocommerce_thankyou_order_received_text', function ($str, $order) use ($drop_is_minted, $holaplex_project_customer_wallet) {
 						$new_str = $str;
 						if ($drop_is_minted) {

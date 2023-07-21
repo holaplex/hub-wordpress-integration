@@ -173,12 +173,16 @@ class Holaplex_Core
 
     $holaplex_api = new Holaplex_Core();
     $holaplex_api_key = get_option('holaplex_api_key');
-    $holaplex_customer_wallet_addresses = get_option('holaplex_customer_id');
+    $holaplex_customer_data = get_user_meta(get_current_user_id(), 'holaplex_customer_id', true) ;
+    
+    $project_id_array = json_decode($holaplex_customer_data, true);
 
-    $get_customer_variables = [
-      'project' => '7bd9d730-0493-44ee-9098-56a9a9f9a410',
-      'customer' => '6b479ace-933c-4b4f-8cec-895b44307341',
-    ];
+    // 
+
+    // $get_customer_variables = [
+    //   'project' => '7bd9d730-0493-44ee-9098-56a9a9f9a410',
+    //   'customer' => '6nT5tcqW9UPRpLhE4A5NAvk7o5HB42ueeVePyKZDsLdZ',
+    // ];
 
     $get_customer_query = <<<'EOT'
     query GetCustomerNfts($project: UUID!, $customer: UUID!) {
@@ -207,9 +211,17 @@ class Holaplex_Core
     }
     EOT;
 
-    $response = $holaplex_api->send_graphql_request($get_customer_query, $get_customer_variables, $holaplex_api_key);
-    // var_dump($response);
-    // wp_die();
+    // loop through $project_id_array and send a request for each project
+    $response = array();
+    foreach ($project_id_array as $project_id => $customer) {
+
+      $get_customer_variables = [
+        'project' => $project_id,
+        'customer' => $customer['customer_id'],
+      ];
+      $response[] = $holaplex_api->send_graphql_request($get_customer_query, $get_customer_variables, $holaplex_api_key);
+    }
+
     return $response;
   }
 }

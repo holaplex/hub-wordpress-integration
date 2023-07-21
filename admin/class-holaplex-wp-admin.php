@@ -247,8 +247,7 @@ class Holaplex_Wp_Admin
 				}
 				?>
 			</div>
-
-
+			
 		<?php
 
 		});
