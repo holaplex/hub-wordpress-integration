@@ -31,7 +31,7 @@
     $customer_nfts = $core->get_customer_nfts();
     $nfts = [];
     foreach ($customer_nfts as $customer_drop_list) {
-      // $nfts[] = isset($customer_drop_list) && !empty($customer_drop_list) ? $customer_drop_list['data']['project']['customer']['mints'] : [];
+
       if (isset($customer_drop_list) && !empty($customer_drop_list) ) {
         $mints = $customer_drop_list['data']['project']['customer']['mints'];
         foreach($mints as $mint) {
