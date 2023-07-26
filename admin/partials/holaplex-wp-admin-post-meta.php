@@ -18,12 +18,11 @@
 
 $holaplex_meta_info = get_post_meta($post->ID, 'holaplex_meta_info', true) ? get_post_meta($post->ID, 'holaplex_meta_info', true) : ''; 
 $holaplex_selected_page_id = get_post_meta($post->ID, 'holaplex_selected_page_id', true) ? get_post_meta($post->ID, 'holaplex_selected_page_id', true) : '';
-$holaplex_selected_product_id = get_post_meta($post->ID, 'holaplex_selected_product_id', true) ? get_post_meta($post->ID, 'holaplex_selected_product_id', true) : '';
 ?>
 <div class="holaplex-app">
   <div class="bootstrap-wrapper">
     <?php 
-      wp_nonce_field(HOLAPLEX_NONCE);
+      // wp_nonce_field(HOLAPLEX_NONCE);
     ?>
     <div class="row">
       <div class="col-lg-4">
@@ -40,7 +39,7 @@ $holaplex_selected_product_id = get_post_meta($post->ID, 'holaplex_selected_prod
         <div class="holaplex-selected-product">
           <h2><?php esc_html_e('Required products', 'holaplex-wp'); ?></h2>
           <?php
-          holaplex_products_dropdown($post, $holaplex_selected_product_id)
+          holaplex_products_dropdown($post)
           ?>
         </div>
         <div class="holaplex-selected-page">

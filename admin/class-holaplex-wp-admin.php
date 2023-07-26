@@ -229,7 +229,7 @@ class Holaplex_Wp_Admin
 									}, $holaplex_projects);
 
 									// check if holaplex_project_id is in project_ids
-									if (!in_array($holaplex_project_id, $project_ids)) {
+									if (!in_array($current_project_id, $project_ids)) {
 										continue;
 									}
 								?>
@@ -778,19 +778,22 @@ class Holaplex_Wp_Admin
 			/**
 			 * dropdown list with selection of products available
 			 */
-			function holaplex_products_dropdown($post, $holaplex_selected_product_id)
+			function holaplex_products_dropdown($post)
 			{
 
 				$holaplex_products =  wc_get_products(array(
 					'holaplex_drop_id' => 'EXISTS'
 				));
 
+				$holaplex_selected_product_id = get_post_meta($post->ID, 'holaplex_selected_product_id', true) ? get_post_meta($post->ID, 'holaplex_selected_product_id', true) : '';
+
+
 				if (!empty($holaplex_products)) {
 					echo '<select name="holaplex_product_select" class="select short">';
 
 					foreach ($holaplex_products as $product) {
 				?>
-						<option <?php echo $product->get_id() == $holaplex_selected_product_id ? "selected" : 'selected="false"'  ?> value="<?php echo esc_attr($product->get_id()); ?>"><?php echo esc_html($product->get_name() . $product->get_id() . '-' . $holaplex_selected_product_id ); ?></option>
+						<option <?php echo $product->get_id() === $holaplex_selected_product_id ? "selected" : 'selected="false"'  ?> value="<?php echo esc_attr($product->get_id()); ?>"><?php echo esc_html($product->get_name() . $product->get_id() . '-' . $holaplex_selected_product_id ); ?></option>
 	<?php
 
 					}
