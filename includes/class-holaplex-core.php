@@ -134,6 +134,8 @@ class Holaplex_Core
     ];
     $core = new Holaplex_Core();
     $response = $core->send_graphql_request($create_customer_query, $create_customer_variables, get_option('holaplex_api_key'));
+    hookbug($response);
+    hookbug("Create Customer Response");
     // save customer_id to user meta
     $customer_id = $response['data']['createCustomer']['customer']['id'];
 
@@ -156,6 +158,8 @@ class Holaplex_Core
 
     $core = new Holaplex_Core();
     $response = $core->send_graphql_request($create_wallet_query, $create_wallet_variables, get_option('holaplex_api_key'));
+    hookbug($response);
+    hookbug("Create Wallet Response");
     $wallet_address = $response['data']['createCustomerWallet']['wallet']['address'];
 
     // Example response
