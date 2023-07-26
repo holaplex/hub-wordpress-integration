@@ -137,6 +137,7 @@ class Holaplex_Wp_Public
 					$created_wallet = $holaplex_api->create_customer_wallet($holaplex_project_id);
 										
 					hookbug('ProjectID'. $holaplex_project_id);
+					hookbug('New API Customer Data: '. $created_wallet);
 					hookbug('New Customer Data Entry');
 					$new_holaplex_customer_data = [];
 					$new_holaplex_customer_data[$holaplex_project_id] = $created_wallet;
@@ -149,7 +150,7 @@ class Holaplex_Wp_Public
 				
 				if (!array_key_exists($holaplex_project_id, $project_id_array)) {
 					$created_wallet = $holaplex_api->create_customer_wallet($holaplex_project_id);				
-					
+					hookbug('New API Customer Data: '. $created_wallet);
 					
 					hookbug('ProjectID'. $holaplex_project_id);
 					hookbug('Using Existing Customer Data Entry. Will add new wallet address');
