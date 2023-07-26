@@ -793,7 +793,7 @@ class Holaplex_Wp_Admin
 
 					foreach ($holaplex_products as $product) {
 				?>
-						<option <?php echo $product->get_id() === $holaplex_selected_product_id ? "selected" : 'selected="false"'  ?> value="<?php echo esc_attr($product->get_id()); ?>"><?php echo esc_html($product->get_name() . $product->get_id() . '-' . $holaplex_selected_product_id ); ?></option>
+						<option <?php echo $product->get_id() === $holaplex_selected_product_id ? "selected" : 'selected="false"'  ?> value="<?php echo esc_attr($product->get_id()); ?>"><?php echo esc_html($product->get_name()); ?></option>
 	<?php
 
 					}
