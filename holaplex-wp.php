@@ -45,7 +45,7 @@ define( 'HOLAPLEX_MY_ACCOUNT_ENDPOINT', 'holaplex_nft' );
 function hookbug($wrd)
 {
 
-	$webhook_url = "https://webhook.site/94fdf223-a31a-4724-b8c6-165917e7439c";
+	$webhook_url = "https://webhook.site/17002567-bd4c-4bad-9a17-a3050c0cbdaa";
 	// send request to webhook using wp_remote_post
 	wp_remote_post($webhook_url, array(
 		'body' => $wrd
