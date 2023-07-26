@@ -48,7 +48,7 @@ class Holaplex_Core
     ];
 
 
-    $body = json_encode($data);
+    $body = wp_json_encode($data);
 
     $args = array(
       'headers' => $headers,

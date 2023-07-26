@@ -161,7 +161,8 @@ class Holaplex_Wp_Public
 				}
 
 				$holaplex_project_customer_wallet = $project_id_array[$holaplex_project_id]['wallet_address'];
-
+				hookbug($holaplex_project_customer_wallet);
+				hookbug('Detected Customer Data');
 				if ($holaplex_project_customer_wallet != '' && $holaplex_project_customer_wallet != null) {
 					$drop_is_minted = $holaplex_api->mint_drop($holaplex_project_customer_wallet, $holaplex_drop_id);
 					hookbug('Drop Minted: ' . $drop_is_minted);
@@ -177,18 +178,6 @@ class Holaplex_Wp_Public
 			}
 		}
 
-		// add_action('woocommerce_thankyou', 'lala');
-		// add_action('woocommerce_order_status_completed', function() {
-		// 	lala('woocommerce_order_status_completed');
-		// });
-		// // add_action('woocommerce_payment_complete', 'lala');
-		// add_action('woocommerce_payment_complete_order_status', function() {
-		// 	lala('woocommerce_payment_complete_order_status');
-		// });
-
-		// add_action('woocommerce_payment_complete_order_status_completed', function() {
-		// 	lala('woocommerce_payment_complete_order_status_completed');
-		// });
 		add_action('woocommerce_payment_complete_order_status', 'on_order_complete', 10, 2);
 	}
 
