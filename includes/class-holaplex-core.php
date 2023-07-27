@@ -30,6 +30,7 @@ class Holaplex_Core
   {
 
 
+    $holaplex_api_key = get_option('holaplex_api_key');
     $api_url = 'https://api.holaplex.com/graphql';  // API endpoint URL
 
     $headers = [
