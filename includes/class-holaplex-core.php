@@ -30,7 +30,7 @@ class Holaplex_Core
   {
 
 
-    $holaplex_api_key = get_option('holaplex_api_key');
+    $holaplex_api_key = $holaplex_api_key ?? get_option('holaplex_api_key');
     $api_url = 'https://api.holaplex.com/graphql';  // API endpoint URL
 
     $headers = [
@@ -65,7 +65,6 @@ class Holaplex_Core
 
     $response_code = wp_remote_retrieve_response_code($response);
     $response_body = wp_remote_retrieve_body($response);
-    hookbug(get_option('holaplex_api_key'));
     // Handle the response
     if ((int)$response_code === 200) {
 
