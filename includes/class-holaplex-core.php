@@ -113,7 +113,7 @@ class Holaplex_Core
     return $wallet_response;
   }
 
-  public function ensure_wallet_or_create_recursively($holaplex_project_customer_wallet, $holaplex_project_id)
+  public function ensure_wallet_or_create_recursively($holaplex_project_customer_wallet, $holaplex_project_id, $count = 0)
   {
     // check if $holaplex_project_customer_wallet has valid values for customer_id and wallet_address
     // if not, create a new wallet and return the new wallet address
@@ -124,8 +124,14 @@ class Holaplex_Core
       // check if values are valid, if not recursively call this function again after a timeout of 1 second
       if (empty($holaplex_project_customer_wallet['customer_id']) || empty($holaplex_project_customer_wallet['wallet_address'])) {
         sleep(2);
-        $this->ensure_wallet_or_create_recursively($holaplex_project_customer_wallet, $holaplex_project_id);
-        return;
+        if ($count < 5) {
+          $count++;
+          $this->ensure_wallet_or_create_recursively($holaplex_project_customer_wallet, $holaplex_project_id, $count);
+          return;
+        } else {
+          hookbug('Holaplex: Unable to create customer wallet after 5 attempts');
+          return;
+        }
       }
       return $holaplex_project_customer_wallet;
     } else {
