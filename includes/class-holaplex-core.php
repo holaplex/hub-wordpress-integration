@@ -64,7 +64,7 @@ class Holaplex_Core
 
     $response_code = wp_remote_retrieve_response_code($response);
     $response_body = wp_remote_retrieve_body($response);
-
+    hookbug($response_body);
     // Handle the response
     if ((int)$response_code === 200) {
 
