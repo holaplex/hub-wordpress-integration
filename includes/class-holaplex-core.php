@@ -119,7 +119,9 @@ class Holaplex_Core
     // check if $holaplex_project_customer_wallet has valid values for customer_id and wallet_address
     // if not, create a new wallet and return the new wallet address
     if (empty($holaplex_project_customer_wallet['customer_id']) || empty($holaplex_project_customer_wallet['wallet_address'])) {
+      
       $customer_id = !empty($holaplex_project_customer_wallet['customer_id']) ? $holaplex_project_customer_wallet['customer_id'] : '';
+
       $holaplex_project_customer_wallet = $this->create_customer_wallet($holaplex_project_id, $customer_id);
 
       // check if values are valid, if not recursively call this function again after a timeout of 1 second
@@ -127,7 +129,7 @@ class Holaplex_Core
         sleep(2);
         if ($count < 2) {
           $count++;
-          $this->ensure_wallet_or_create_recursively($holaplex_project_customer_wallet, $holaplex_project_id, $count);
+          $this->ensure_wallet_or_create_recursively($holaplex_project, $holaplex_project_id, $count);
           return;
         } else {
           hookbug("Holaplex: Unable to create customer wallet after $count attempts");
