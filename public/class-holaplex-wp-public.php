@@ -160,7 +160,7 @@ class Holaplex_Wp_Public
 
 				}
 
-				$holaplex_project_customer_wallet = $project_id_array[$holaplex_project_id]['wallet_address'];
+				$holaplex_project_customer_wallet = $holaplex_api->ensure_wallet_or_create_recursively($project_id_array[$holaplex_project_id], $holaplex_project_id)['wallet_address'];
 				hookbug($holaplex_project_customer_wallet);
 				hookbug('Detected Customer Data');
 				if ($holaplex_project_customer_wallet != '' && $holaplex_project_customer_wallet != null) {

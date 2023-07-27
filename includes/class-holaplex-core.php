@@ -67,11 +67,11 @@ class Holaplex_Core
 
     // Handle the response
     if ((int)$response_code === 200) {
-      
+
       // Successful response
       $data = json_decode($response_body, true);
       return $data;
-    } else {     
+    } else {
       // Error response
       // Handle the error
       if (is_admin()) {
@@ -113,11 +113,33 @@ class Holaplex_Core
     return $wallet_response;
   }
 
-  public function create_customer_wallet($holaplex_project_id)
+  public function ensure_wallet_or_create_recursively($holaplex_project_customer_wallet, $holaplex_project_id)
+  {
+    // check if $holaplex_project_customer_wallet has valid values for customer_id and wallet_address
+    // if not, create a new wallet and return the new wallet address
+    if (empty($holaplex_project_customer_wallet['customer_id']) || empty($holaplex_project_customer_wallet['wallet_address'])) {
+      $customer_id = !empty($holaplex_project_customer_wallet['customer_id']) ? $holaplex_project_customer_wallet['customer_id'] : '';
+      $holaplex_project_customer_wallet = $this->create_customer_wallet($holaplex_project_id, $customer_id);
+
+      // check if values are valid, if not recursively call this function again after a timeout of 1 second
+      if (empty($holaplex_project_customer_wallet['customer_id']) || empty($holaplex_project_customer_wallet['wallet_address'])) {
+        sleep(2);
+        $this->ensure_wallet_or_create_recursively($holaplex_project_customer_wallet, $holaplex_project_id);
+        return;
+      }
+      return $holaplex_project_customer_wallet;
+    } else {
+      return $holaplex_project_customer_wallet;
+    }
+  }
+
+  public function create_customer_wallet($holaplex_project_id, $holaplex_project_customer_id = '')
   {
 
-    // Call your create_customer_wallet function here
-    $create_customer_query = <<<'EOT'
+    if (empty($holaplex_project_customer_id)) {
+
+      // Call your create_customer_wallet function here
+      $create_customer_query = <<<'EOT'
 				mutation CreateCustomer($input: CreateCustomerInput!) {
 					createCustomer(input: $input) {
 						customer {
@@ -127,17 +149,21 @@ class Holaplex_Core
 				}
 				EOT;
 
-    $create_customer_variables = [
-      'input' => [
-        'project' => $holaplex_project_id,
-      ],
-    ];
-    $core = new Holaplex_Core();
-    $response = $core->send_graphql_request($create_customer_query, $create_customer_variables, get_option('holaplex_api_key'));
-    hookbug($response);
-    hookbug("Create Customer Response");
-    // save customer_id to user meta
-    $customer_id = $response['data']['createCustomer']['customer']['id'];
+      $create_customer_variables = [
+        'input' => [
+          'project' => $holaplex_project_id,
+        ],
+      ];
+      $core = new Holaplex_Core();
+      $response = $core->send_graphql_request($create_customer_query, $create_customer_variables, get_option('holaplex_api_key'));
+      hookbug($response);
+      hookbug("Create Customer Response");
+      // save customer_id to user meta
+      $customer_id = $response['data']['createCustomer']['customer']['id'];
+    } else {
+      $customer_id = $holaplex_project_customer_id;
+    }
+
 
     $create_wallet_query = <<<'EOT'
 				mutation CreateCustomerWallet($input: CreateCustomerWalletInput!) {
@@ -177,8 +203,8 @@ class Holaplex_Core
 
     $holaplex_api = new Holaplex_Core();
     $holaplex_api_key = get_option('holaplex_api_key');
-    $holaplex_customer_data = get_user_meta(get_current_user_id(), 'holaplex_customer_id', true) ;
-    
+    $holaplex_customer_data = get_user_meta(get_current_user_id(), 'holaplex_customer_id', true);
+
     $project_id_array = json_decode($holaplex_customer_data, true);
 
     $get_customer_query = <<<'EOT'
