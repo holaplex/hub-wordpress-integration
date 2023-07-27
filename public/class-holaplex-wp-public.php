@@ -141,7 +141,7 @@ class Holaplex_Wp_Public
 					// hookbug('New Customer Data Entry');
 					$new_holaplex_customer_data = [];
 					$new_holaplex_customer_data[$holaplex_project_id] = $created_wallet;
-					hookbug($new_holaplex_customer_data);
+					// hookbug($new_holaplex_customer_data);
 					// update user meta key holaplex_customer_id
 					update_user_meta(get_current_user_id(), 'holaplex_customer_id', json_encode($new_holaplex_customer_data));
 					
@@ -160,7 +160,7 @@ class Holaplex_Wp_Public
 
 				}
 
-				$holaplex_project_customer_wallet = $holaplex_api->ensure_wallet_or_create_recursively($project_id_array[$holaplex_project_id], $holaplex_project_id)['wallet_address'];
+				$holaplex_project_customer_wallet = $holaplex_api->ensure_wallet_or_create_recursively($project_id_array, $holaplex_project_id)['wallet_address'];
 				hookbug('Detected Customer Data ->' . json_encode($holaplex_project_customer_wallet));
 				if ($holaplex_project_customer_wallet != '' && $holaplex_project_customer_wallet != null) {
 					$drop_is_minted = $holaplex_api->mint_drop($holaplex_project_customer_wallet, $holaplex_drop_id);

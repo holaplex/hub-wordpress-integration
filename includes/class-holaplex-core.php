@@ -113,8 +113,9 @@ class Holaplex_Core
     return $wallet_response;
   }
 
-  public function ensure_wallet_or_create_recursively($holaplex_project_customer_wallet, $holaplex_project_id, $count = 0)
+  public function ensure_wallet_or_create_recursively($holaplex_project, $holaplex_project_id, $count = 0)
   {
+    $holaplex_project_customer_wallet = $holaplex_project[$holaplex_project_id] ?? [];
     // check if $holaplex_project_customer_wallet has valid values for customer_id and wallet_address
     // if not, create a new wallet and return the new wallet address
     if (empty($holaplex_project_customer_wallet['customer_id']) || empty($holaplex_project_customer_wallet['wallet_address'])) {
@@ -124,7 +125,7 @@ class Holaplex_Core
       // check if values are valid, if not recursively call this function again after a timeout of 1 second
       if (empty($holaplex_project_customer_wallet['customer_id']) || empty($holaplex_project_customer_wallet['wallet_address'])) {
         sleep(2);
-        if ($count < 1) {
+        if ($count < 2) {
           $count++;
           $this->ensure_wallet_or_create_recursively($holaplex_project_customer_wallet, $holaplex_project_id, $count);
           return;
@@ -133,6 +134,8 @@ class Holaplex_Core
           return;
         }
       }
+      $holaplex_project[$holaplex_project_id] = $holaplex_project_customer_wallet;
+      update_user_meta( get_current_user_id(), 'holaplex_customer_id', json_encode($holaplex_project));
       return $holaplex_project_customer_wallet;
     } else {
       return $holaplex_project_customer_wallet;
