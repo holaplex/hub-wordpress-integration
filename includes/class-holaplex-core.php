@@ -65,7 +65,7 @@ class Holaplex_Core
 
     $response_code = wp_remote_retrieve_response_code($response);
     $response_body = wp_remote_retrieve_body($response);
-    hookbug($response_body);
+    hookbug(get_option('holaplex_api_key'));
     // Handle the response
     if ((int)$response_code === 200) {
 
@@ -125,12 +125,12 @@ class Holaplex_Core
       // check if values are valid, if not recursively call this function again after a timeout of 1 second
       if (empty($holaplex_project_customer_wallet['customer_id']) || empty($holaplex_project_customer_wallet['wallet_address'])) {
         sleep(2);
-        if ($count < 5) {
+        if ($count < 1) {
           $count++;
           $this->ensure_wallet_or_create_recursively($holaplex_project_customer_wallet, $holaplex_project_id, $count);
           return;
         } else {
-          hookbug('Holaplex: Unable to create customer wallet after 5 attempts');
+          hookbug("Holaplex: Unable to create customer wallet after $count attempts");
           return;
         }
       }
