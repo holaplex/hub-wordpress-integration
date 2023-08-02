@@ -27,7 +27,6 @@
   <h4>My NFTs</h4>
   <?php
 
-    $core = new Holaplex_Core();
     $customer_nfts = $core->get_customer_nfts();
     $nfts = [];
     foreach ($customer_nfts as $customer_drop_list) {

@@ -241,7 +241,7 @@ class Holaplex_Wp_Admin
 								<?php } ?>
 							</select>
 						</p>
-						<p class="holaplex_tab_submit_data form-field">
+						<p class="holaplex_tab_submit_data form-field" style="display: none;">
 							<!-- show checkbox -->
 							<label for="holaplex_sync_product_with_item">Supply Low Disable Cart</label>
 							<input type="checkbox" name="holaplex_product_add_to_cart_on_low" id="holaplex_product_add_to_cart_on_low" value="1" <?php echo esc_attr($holaplex_product_add_to_cart_on_low) === '1' ? 'checked' : null; ?>>

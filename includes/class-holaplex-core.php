@@ -389,7 +389,11 @@ class Holaplex_Core
 
     $response = $this->send_graphql_request($get_drop_query, $get_drop_variables, $holaplex_api_key);
 
-    return $response['data']['project']['drop'];
+    if (isset($response['data']['project']['drop'])) {
+      return $response['data']['project']['drop'];
+    } else {
+      return [];
+    }
   }
 
 }

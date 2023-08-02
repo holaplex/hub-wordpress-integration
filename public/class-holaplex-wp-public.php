@@ -64,6 +64,7 @@ class Holaplex_Wp_Public
 		$this->init_replace_post_content();
 		$this->init_content_gate_redirect();
 		$this->show_drop_after_product_meta();
+		// $this->init_disable_add_to_cart_button_on_low_supply();
 	}
 
 	/**
@@ -116,14 +117,14 @@ class Holaplex_Wp_Public
 
 	public function show_drop_after_product_meta()
 	{
-		$holaplex_projects = $this->core->holaplex_projects;
 		$core = $this->core;
+		$holaplex_projects = $core->holaplex_projects;
 
 		function show_drop_after_product_meta($holaplex_projects, $core)
 		{
 			global $post;
 			$drop_id = get_post_meta($post->ID, 'holaplex_drop_id', true);
-			$project_id = get_post_meta($post->ID, 'holaplex_project_id', true);	
+			$project_id = get_post_meta($post->ID, 'holaplex_project_id', true);
 			// check if project_id in $holaplex_projects
 			$project_exists = false;
 
@@ -141,11 +142,11 @@ class Holaplex_Wp_Public
 			if ($drop_id && $drop_id !== '') {
 				// show message if drop supply is 0 
 				$drop =  $core->get_drop($project_id, $drop_id);
-
-				if ( $drop['collection']['totalMints'] - $drop['collection']['supply'] < 1) {
-					echo '<div class="holaplex-drop-warning">🪫 Drop supply is low</div>';
+				if ($drop && !empty($drop)) {
+					if ($drop['collection']['totalMints'] - $drop['collection']['supply'] < 1) {
+						echo '<div class="holaplex-drop-warning">🪫 Drop supply is low</div>';
+					}
 				}
-
 			}
 		}
 
@@ -157,19 +158,33 @@ class Holaplex_Wp_Public
 	public function mint_drop_on_order_complete()
 	{
 
-		function on_order_complete($order_status, $order_id)
+		$core = $this->core;
+		$holaplex_projects = $core->holaplex_projects;
+
+		function on_order_complete($order_status, $order_id, $holaplex_projects)
 		{
 			$order = wc_get_order($order_id);
 			$items = $order->get_items();
 			$holaplex_api = new Holaplex_Core();
+			$mint_status_message = '';
 
 			foreach ($items as $item) {
 				$product_id = $item->get_product_id();
 				$holaplex_drop_id = get_post_meta($product_id, 'holaplex_drop_id', true);
 				$holaplex_project_id = get_post_meta($product_id, 'holaplex_project_id', true);
 
+				$project_ids = array_map(function ($project) {
+					return $project['id'];
+				}, $holaplex_projects);
+
+				// check if holaplex_project_id is in project_ids
+				if (!in_array($holaplex_project_id, $project_ids)) {
+					$mint_status_message = 'Skipped minting for one or more drops. Please check Holaplex Hub Settings';
+					continue;
+				}				
+
 				// get current logged in user meta key holaplex_customer_id
-				$holaplex_customer_data = get_user_meta(get_current_user_id(), 'holaplex_customer_id', true) ;
+				$holaplex_customer_data = get_user_meta(get_current_user_id(), 'holaplex_customer_id', true);
 				// split holaplex_customer_id into array
 				if ($holaplex_customer_data != '') {
 					$project_id_array = json_decode($holaplex_customer_data, true);
@@ -180,7 +195,7 @@ class Holaplex_Wp_Public
 				if (count($project_id_array) == 0) {
 					// create new customer and wallet
 					$created_wallet = $holaplex_api->create_customer_wallet($holaplex_project_id);
-										
+
 					// hookbug('ProjectID'. $holaplex_project_id);
 					// hookbug('New API Customer Data: '. json_encode($created_wallet));
 					// hookbug('New Customer Data Entry');
@@ -189,20 +204,19 @@ class Holaplex_Wp_Public
 					// hookbug($new_holaplex_customer_data);
 					// update user meta key holaplex_customer_id
 					update_user_meta(get_current_user_id(), 'holaplex_customer_id', json_encode($new_holaplex_customer_data));
-					
+
 					$project_id_array = $new_holaplex_customer_data;
 				}
-				
+
 				if (!array_key_exists($holaplex_project_id, $project_id_array)) {
-					$created_wallet = $holaplex_api->create_customer_wallet($holaplex_project_id);				
+					$created_wallet = $holaplex_api->create_customer_wallet($holaplex_project_id);
 					// hookbug('New API Customer Data: '. json_encode($created_wallet));
-					
+
 					// hookbug('ProjectID'. $holaplex_project_id);
 					// hookbug('Using Existing Customer Data Entry. Will add new wallet address');
 					$project_id_array[$holaplex_project_id] = $created_wallet;
 					// update user meta key holaplex_customer_id
 					update_user_meta(get_current_user_id(), 'holaplex_customer_id', json_encode($project_id_array));
-
 				}
 
 				$holaplex_project_customer_wallet = $holaplex_api->ensure_wallet_or_create_recursively($project_id_array, $holaplex_project_id)['wallet_address'];
@@ -211,22 +225,23 @@ class Holaplex_Wp_Public
 					$drop_is_minted = $holaplex_api->mint_drop($holaplex_project_customer_wallet, $holaplex_drop_id);
 					hookbug('Drop Minted: ' . $drop_is_minted);
 					hookbug($drop_is_minted);
-					add_filter('woocommerce_thankyou_order_received_text', function ($str, $order) use ($drop_is_minted, $holaplex_project_customer_wallet) {
-						$new_str = $str;
-						if ($drop_is_minted) {
-							$new_str = $str . ' <br/> <p>Drop minted and sent to receiver wallet: ' . $holaplex_project_customer_wallet . '.</p>';
-						}
-						return esc_html($new_str);
-					}, 10, 2);
+					$order->update_meta_data( 'holaplex_mint_drop_status', !empty($mint_status_message) ? $mint_status_message : 'Drop(s) minted successfully' );
+					$order->save();
 				}
 			}
 		}
 
-		add_action('woocommerce_payment_complete_order_status', 'on_order_complete', 10, 2);
+		add_action('woocommerce_payment_complete_order_status', function ($order_status, $order_id) use ($holaplex_projects) {
+			on_order_complete($order_status, $order_id, $holaplex_projects);
+		}, 10, 2);
 	}
 
 	public function init_display_nft_tab_on_my_account()
 	{
+
+		$core = $this->core;
+
+
 		add_action('init', 'register_new_item_endpoint');
 
 		/**
@@ -272,24 +287,12 @@ class Holaplex_Wp_Public
 		}
 
 
-		add_action('woocommerce_account_' . HOLAPLEX_MY_ACCOUNT_ENDPOINT . '_endpoint', function ()
-		{
+		add_action('woocommerce_account_' . HOLAPLEX_MY_ACCOUNT_ENDPOINT . '_endpoint', function () use ($core) {
 
-			
+
 			include_once HOLAPLEX_PLUGIN_PATH . 'public/partials/holaplex-wp-public-my-account.php';
 		});
 
-		/**
-		 * Add content to the new tab.
-		 *
-		 * @return  string.
-		 */
-		function holaplex_add_new_item_content()
-		{
-
-
-			include_once HOLAPLEX_PLUGIN_PATH . 'public/partials/holaplex-wp-public-my-account.php';
-		}
 	}
 
 	public function init_replace_post_content()
@@ -338,11 +341,13 @@ class Holaplex_Wp_Public
 		add_filter('the_content', 'holaplex_replace_post_content');
 	}
 
-	public function init_content_gate_redirect() {
+	public function init_content_gate_redirect()
+	{
 		/**
 		 * for redirect feature
 		 */
-		function holaplex_redirect() {
+		function holaplex_redirect()
+		{
 			global $post;
 			if (!$post) {
 				return;
@@ -352,15 +357,51 @@ class Holaplex_Wp_Public
 			$current_user = wp_get_current_user();
 
 			if (!current_user_can('administrator')) {
-				if ( !$product_id || !wc_customer_bought_product($current_user->email, $current_user->ID, $product_id)) {
+				if (!$product_id || !wc_customer_bought_product($current_user->email, $current_user->ID, $product_id)) {
 					if (!is_home() && $selected_page && 'redirect_meta' === $post->holaplex_meta_info) {
 						$url = get_permalink($selected_page);
-						wp_redirect( $url );
+						wp_redirect($url);
 						exit;
 					}
 				}
 			}
 		}
-		add_action( 'template_redirect', 'holaplex_redirect' );		
+		add_action('template_redirect', 'holaplex_redirect');
+	}
+
+	public function init_disable_add_to_cart_button_on_low_supply()
+	{
+		$core = $this->core;
+
+		add_filter('woocommerce_loop_add_to_cart_link', function ($add_to_cart_html, $product) use ($core) {
+			return remove_add_to_cart_specific_products($add_to_cart_html, $product, $core);
+		}, 25, 2);
+
+		function remove_add_to_cart_specific_products($add_to_cart_html, $product, $core)
+		{
+			$product_id = $product->get_id();
+			
+			$drop_id = get_post_meta($product_id, 'holaplex_drop_id', true);
+			$project_id = get_post_meta($product_id, 'holaplex_project_id', true);
+			$holaplex_product_add_to_cart_on_low = get_post_meta($product_id, 'holaplex_product_add_to_cart_on_low', true);
+			
+			// get the drop 
+			if ($drop_id && $drop_id !== '') {
+				// show message if drop supply is 0 
+				$drop =  $core->get_drop($project_id, $drop_id);
+				if ($drop) {
+					if ($drop['collection']['totalMints'] - $drop['collection']['supply'] < 1) {
+						if ($holaplex_product_add_to_cart_on_low) {
+							return '<button disable class="disbaled_button button alt">Drop Supply Low</button>';
+						}
+					}
+				} else {
+					return "Hello";
+				}
+			}
+
+
+			return $add_to_cart_html;
+		}
 	}
 }
