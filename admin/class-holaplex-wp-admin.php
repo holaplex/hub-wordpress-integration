@@ -58,6 +58,15 @@ class Holaplex_Wp_Admin
 
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
+		
+		$core = new Holaplex_Core();
+
+		$core->login_to_holaplex();
+
+		$this->holaplex_status = $core->holaplex_status;
+		$this->holaplex_projects =  $core->holaplex_projects;
+		$this->holaplex_org_credits = $core->holaplex_org_credits;
+
 		$this->add_wc_products_drop_id_filter();
 		$this->login_to_holaplex();
 		$this->add_holaplex_menu();
@@ -72,6 +81,73 @@ class Holaplex_Wp_Admin
 		$this->init_shortcode_handler();
 		$this->init_add_post_meta_options();
 		$this->init_add_post_content_gate_meta_box();
+		
+
+
+	}
+
+	public function login_to_holaplex()
+	{
+		$id = get_option('holaplex_org_id');
+		$holaplex_api_key = get_option('holaplex_api_key');
+
+		if (!$id || !$holaplex_api_key || empty($id) || empty($holaplex_api_key)) {
+			return false;
+		}
+
+		$query = <<<'EOT'
+		query getOrg($id: UUID!) {
+			organization(id: $id) {
+				credits {
+					id
+					balance
+				}
+				projects {
+					id
+					name
+					drops {
+						id
+						projectId
+						creationStatus
+						startTime
+						endTime
+						price
+						createdAt
+						shutdownAt
+						collection {
+							id
+							supply
+							totalMints
+							metadataJson {
+								id
+								name
+								image
+								description
+								symbol
+							}
+						}
+						status
+					}
+				}
+			}
+		}
+		EOT;
+
+		$variables = [
+			'id' => $id,
+		];
+
+		$core = new Holaplex_Core();
+		$response = $core->send_graphql_request($query, $variables, $holaplex_api_key);
+
+		if ($response) {
+			$this->holaplex_status = '✅ connected';
+			$this->holaplex_projects =  $response['data']['organization']['projects'];
+			$this->holaplex_org_credits = $response['data']['organization']['credits']['balance'];
+		} else {
+			$this->holaplex_status = '⛔ disconnected';
+			$this->holaplex_projects = [];
+		}
 	}
 
 	/**
@@ -192,7 +268,7 @@ class Holaplex_Wp_Admin
 				<p class="form-field holaplex-status">
 					<label for="holaplex_status">Holaplex Status</label>
 					<span class="woocommerce-help-tip"></span>
-					<input type="text" class="short" name="holaplex_status" id="holaplex_status" value="<?php echo esc_html($holaplex_status); ?>" readonly>
+					<input type="text" class="short" name="holaplex_status" id="holaplex_status" value="<?php echo esc_attr($holaplex_status); ?>" readonly>
 				</p>
 				<!-- show a drop down list of holaplex drops -->
 				<?php
@@ -214,7 +290,7 @@ class Holaplex_Wp_Admin
 						<p class="holaplex_drop_id_field form-field">
 							<label for="_stock_status">Drops</label>
 							<span class="woocommerce-help-tip"></span>
-							<select style="" id="_holaplex_drop_project_ids" name="_holaplex_drop_project_id" class="select short">
+							<select id="_holaplex_drop_project_ids" name="_holaplex_drop_project_id" class="select short">
 								<option value="">Select a drop</option>
 								<?php foreach ($project_drops as $drop) {
 									$drop_id = $drop['id'];
@@ -513,70 +589,6 @@ class Holaplex_Wp_Admin
 
 	public function register_ajax_route()
 	{
-	}
-
-	private function login_to_holaplex()
-	{
-		$id = get_option('holaplex_org_id');
-		$holaplex_api_key = get_option('holaplex_api_key');
-
-		if (!$id || !$holaplex_api_key || empty($id) || empty($holaplex_api_key)) {
-			return false;
-		}
-
-		$query = <<<'EOT'
-		query getOrg($id: UUID!) {
-			organization(id: $id) {
-				credits {
-					id
-					balance
-				}
-				projects {
-					id
-					name
-					drops {
-						id
-						projectId
-						creationStatus
-						startTime
-						endTime
-						price
-						createdAt
-						shutdownAt
-						collection {
-							id
-							supply
-							totalMints
-							metadataJson {
-								id
-								name
-								image
-								description
-								symbol
-							}
-						}
-						status
-					}
-				}
-			}
-		}
-		EOT;
-
-		$variables = [
-			'id' => $id,
-		];
-
-		$core = new Holaplex_Core();
-		$response = $core->send_graphql_request($query, $variables, $holaplex_api_key);
-
-		if ($response) {
-			$this->holaplex_status = '✅ connected';
-			$this->holaplex_projects =  $response['data']['organization']['projects'];
-			$this->holaplex_org_credits = $response['data']['organization']['credits']['balance'];
-		} else {
-			$this->holaplex_status = '⛔ disconnected';
-			$this->holaplex_projects = [];
-		}
 	}
 
 	public function add_holaplex_menu()
