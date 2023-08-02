@@ -41,7 +41,7 @@ class Holaplex_Wp_Public
 	 */
 	private $version;
 
-	private $core;
+	public $core;
 
 	/**
 	 * Initialize the class and set its properties.
@@ -55,8 +55,8 @@ class Holaplex_Wp_Public
 
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
-		$this->core = new Holaplex_Core();
 
+		$this->core = new Holaplex_Core();
 		$this->core->login_to_holaplex();
 
 		$this->mint_drop_on_order_complete();
@@ -64,8 +64,6 @@ class Holaplex_Wp_Public
 		$this->init_replace_post_content();
 		$this->init_content_gate_redirect();
 		$this->show_drop_after_product_meta();
-
-
 	}
 
 	/**
@@ -119,8 +117,9 @@ class Holaplex_Wp_Public
 	public function show_drop_after_product_meta()
 	{
 		$holaplex_projects = $this->core->holaplex_projects;
+		$core = $this->core;
 
-		function show_drop_after_product_meta($holaplex_projects)
+		function show_drop_after_product_meta($holaplex_projects, $core)
 		{
 			global $post;
 			$drop_id = get_post_meta($post->ID, 'holaplex_drop_id', true);
@@ -128,6 +127,7 @@ class Holaplex_Wp_Public
 
 			// check if project_id in $holaplex_projects
 			$project_exists = false;
+
 			foreach ($holaplex_projects as $project) {
 				if ($project['id'] === $project_id) {
 					$project_exists = true;
@@ -135,23 +135,23 @@ class Holaplex_Wp_Public
 			}
 
 			if (!$project_exists) {
-				echo '<div class="holaplex-drop-id">Minting Drop might not work</div>';
+				echo '<div class="holaplex-drop-warning">⚠️ Minting Drop might not work</div>';
 				return;
 			}
 
 			if ($drop_id && $drop_id !== '') {
 				// show message if drop supply is 0 
-				$holaplex_api = new Holaplex_Core();
-				$drop =  $holaplex_api->get_drop($project_id, $drop_id);
+				$drop =  $core->get_drop($project_id, $drop_id);
 
 				if ( $drop['collection']['totalMints'] - $drop['collection']['supply'] < 1) {
-					echo '<div class="holaplex-drop-id">Drop supply is low</div>';
-				} 
+					echo '<div class="holaplex-drop-warning">🪫 Drop supply is low</div>';
+				}
 
 			}
 		}
-		add_action('woocommerce_product_meta_end', function () use ($holaplex_projects) {
-			show_drop_after_product_meta($holaplex_projects);
+
+		add_action('woocommerce_product_meta_end', function () use ($holaplex_projects, $core) {
+			show_drop_after_product_meta($holaplex_projects, $core);
 		});
 	}
 

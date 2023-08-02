@@ -13,6 +13,70 @@ class Holaplex_Core
     $this->login_to_holaplex();
   }
 
+
+  public function login_to_holaplex()
+	{
+		$id = get_option('holaplex_org_id');
+		$holaplex_api_key = get_option('holaplex_api_key');
+
+		if (!$id || !$holaplex_api_key || empty($id) || empty($holaplex_api_key)) {
+			return false;
+		}
+
+		$query = <<<'EOT'
+		query getOrg($id: UUID!) {
+			organization(id: $id) {
+				credits {
+					id
+					balance
+				}
+				projects {
+					id
+					name
+					drops {
+						id
+						projectId
+						creationStatus
+						startTime
+						endTime
+						price
+						createdAt
+						shutdownAt
+						collection {
+							id
+							supply
+							totalMints
+							metadataJson {
+								id
+								name
+								image
+								description
+								symbol
+							}
+						}
+						status
+					}
+				}
+			}
+		}
+		EOT;
+
+		$variables = [
+			'id' => $id,
+		];
+
+		$response = $this->send_graphql_request($query, $variables, $holaplex_api_key);
+
+		if ($response) {
+			$this->holaplex_status = '✅ connected';
+			$this->holaplex_projects =  $response['data']['organization']['projects'];
+			$this->holaplex_org_credits = $response['data']['organization']['credits']['balance'];
+		} else {
+			$this->holaplex_status = '⛔ disconnected';
+			$this->holaplex_projects = [];
+		}
+	}
+
   public function holaplex_display_custom_text()
   {
     if (get_option("holaplex_custom_text")) {
@@ -145,7 +209,7 @@ class Holaplex_Core
         }
       }
       $holaplex_project[$holaplex_project_id] = $holaplex_project_customer_wallet;
-      update_user_meta(get_current_user_id(), 'holaplex_customer_id', json_encode($holaplex_project));
+      update_user_meta( get_current_user_id(), 'holaplex_customer_id', json_encode($holaplex_project));
       return $holaplex_project_customer_wallet;
     } else {
       return $holaplex_project_customer_wallet;
@@ -176,6 +240,7 @@ class Holaplex_Core
 
       $response = $this->send_graphql_request($create_customer_query, $create_customer_variables, get_option('holaplex_api_key'));
 
+      // save customer_id to user meta
       $customer_id = $response['data']['createCustomer']['customer']['id'];
     } else {
       $customer_id = $holaplex_project_customer_id;
@@ -222,30 +287,30 @@ class Holaplex_Core
     $project_id_array = json_decode($holaplex_customer_data, true);
 
     $get_customer_query = <<<'EOT'
-    query GetCustomerNfts($project: UUID!, $customer: UUID!) {
-        project(id: $project) {
-            id
-            customer(id: $customer) {
-                mints {
-                    id
-                    address
-                    createdAt
-                    collectionId
-                    collection {
-                        id
-                        blockchain
-                        metadataJson {
-                            id
-                            name
-                            description
-                            image
-                            externalUrl
-                            }
-                    }
-                }
-            }
-        }
-    }
+      query GetCustomerNfts($project: UUID!, $customer: UUID!) {
+          project(id: $project) {
+              id
+              customer(id: $customer) {
+                  mints {
+                      id
+                      address
+                      createdAt
+                      collectionId
+                      collection {
+                          id
+                          blockchain
+                          metadataJson {
+                              id
+                              name
+                              description
+                              image
+                              externalUrl
+                              }
+                      }
+                  }
+              }
+          }
+      }
     EOT;
 
     // loop through $project_id_array and send a request for each project
@@ -324,70 +389,7 @@ class Holaplex_Core
 
     $response = $this->send_graphql_request($get_drop_query, $get_drop_variables, $holaplex_api_key);
 
-    return $response;
+    return $response['data']['project']['drop'];
   }
 
-  public function login_to_holaplex()
-	{
-		$id = get_option('holaplex_org_id');
-		$holaplex_api_key = get_option('holaplex_api_key');
-
-		if (!$id || !$holaplex_api_key || empty($id) || empty($holaplex_api_key)) {
-			return false;
-		}
-
-		$query = <<<'EOT'
-		query getOrg($id: UUID!) {
-			organization(id: $id) {
-				credits {
-					id
-					balance
-				}
-				projects {
-					id
-					name
-					drops {
-						id
-						projectId
-						creationStatus
-						startTime
-						endTime
-						price
-						createdAt
-						shutdownAt
-						collection {
-							id
-							supply
-							totalMints
-							metadataJson {
-								id
-								name
-								image
-								description
-								symbol
-							}
-						}
-						status
-					}
-				}
-			}
-		}
-		EOT;
-
-		$variables = [
-			'id' => $id,
-		];
-
-		$core = new Holaplex_Core();
-		$response = $core->send_graphql_request($query, $variables, $holaplex_api_key);
-
-		if ($response) {
-			$this->holaplex_status = '✅ connected';
-			$this->holaplex_projects =  $response['data']['organization']['projects'];
-			$this->holaplex_org_credits = $response['data']['organization']['credits']['balance'];
-		} else {
-			$this->holaplex_status = '⛔ disconnected';
-			$this->holaplex_projects = [];
-		}
-	}
 }
