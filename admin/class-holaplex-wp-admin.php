@@ -137,6 +137,7 @@ class Holaplex_Wp_Admin
 			$project_id = isset($_POST['project_id']) ? sanitize_text_field($_POST['project_id']) : null;
 			$drop_id = isset($_POST['drop_id']) ? sanitize_text_field($_POST['drop_id']) : null;
 			$post_id = isset($_POST['post_id']) ? sanitize_text_field($_POST['post_id']) : null;
+			$holaplex_product_add_to_cart_on_low = isset($_POST['holaplex_product_add_to_cart_on_low']) ? sanitize_text_field($_POST['holaplex_product_add_to_cart_on_low']) : null;
 
 			if (!$project_id || !$drop_id || !$post_id) {
 				die('Missing project_id, post_id or drop_id');
@@ -145,6 +146,7 @@ class Holaplex_Wp_Admin
 
 			update_post_meta($post_id, 'holaplex_drop_id', $drop_id);
 			update_post_meta($post_id, 'holaplex_project_id', $project_id);
+			update_post_meta($post_id, 'holaplex_product_add_to_cart_on_low', $holaplex_product_add_to_cart_on_low);
 		}
 
 		add_action('wp_ajax_add_drop_id_to_product', 'add_drop_id_to_product_callback');
@@ -184,6 +186,7 @@ class Holaplex_Wp_Admin
 
 			$current_drop_id = get_post_meta(get_the_ID(), 'holaplex_drop_id', true);
 			$current_project_id = get_post_meta(get_the_ID(), 'holaplex_project_id', true);
+			$holaplex_product_add_to_cart_on_low = get_post_meta(get_the_ID(), 'holaplex_product_add_to_cart_on_low', true);
 			$nonce = wp_create_nonce('holaplex_sync_product_with_item');
 
 ?>
@@ -237,6 +240,12 @@ class Holaplex_Wp_Admin
 									<option <?php echo esc_attr($current_drop_id) === $drop_id ? 'selected' : null; ?> value="<?php echo esc_attr("$drop_id|$drop_project_id"); ?>"><?php echo esc_html("🖼️$drop_name -Supply: $collection_supply -Status: $drop_status"); ?></option>
 								<?php } ?>
 							</select>
+						</p>
+						<p class="holaplex_tab_submit_data form-field">
+							<!-- show checkbox -->
+							<label for="holaplex_sync_product_with_item">Supply Low Disable Cart</label>
+							<input type="checkbox" name="holaplex_product_add_to_cart_on_low" id="holaplex_product_add_to_cart_on_low" value="1" <?php echo esc_attr($holaplex_product_add_to_cart_on_low) === '1' ? 'checked' : null; ?>>
+							
 						</p>
 						<p class="holaplex_tab_submit_data form-field">
 							<button data-wp-nonce="<?php echo esc_attr($nonce); ?>" type="button" class="button button-primary button-large" id="holaplex_tab_submit_data">Submit</button>

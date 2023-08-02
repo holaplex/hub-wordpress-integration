@@ -55,6 +55,7 @@ jQuery(document).ready(function ($) {
         const ele = $(this);
 
         let drop_project_id = $('#_holaplex_drop_project_ids').val();
+        let holaplex_product_add_to_cart_on_low = $('#holaplex_product_add_to_cart_on_low').val();
         drop_project_id = drop_project_id.split('|');
         const drop_id = drop_project_id[0];
         const projectId = drop_project_id[1];
@@ -70,6 +71,7 @@ jQuery(document).ready(function ($) {
             type: 'POST',
             data: {
                 action: 'add_drop_id_to_product',
+                holaplex_product_add_to_cart_on_low,
                 drop_id: drop_id,
                 _wpnonce: nonce,
                 project_id: projectId,

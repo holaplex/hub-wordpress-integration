@@ -124,7 +124,6 @@ class Holaplex_Wp_Public
 			global $post;
 			$drop_id = get_post_meta($post->ID, 'holaplex_drop_id', true);
 			$project_id = get_post_meta($post->ID, 'holaplex_project_id', true);	
-
 			// check if project_id in $holaplex_projects
 			$project_exists = false;
 
@@ -295,9 +294,7 @@ class Holaplex_Wp_Public
 
 	public function init_replace_post_content()
 	{
-		/**
-		 * swap content of the entry
-		 */
+
 		function holaplex_replace_post_content($content)
 		{
 			global $post;
