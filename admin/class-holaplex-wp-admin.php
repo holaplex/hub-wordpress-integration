@@ -64,10 +64,10 @@ class Holaplex_Wp_Admin
 		$this->init_ajax_sync_product_with_drop();
 		$this->init_ajax_sync_drop_id_with_product();
 		$this->init_ajax_remove_product_from_drop();
-		$this->init_add_holaplex_customer_id_field();
-		$this->init_save_holaplex_customer_id_field();
 		$this->init_ajax_holaplex_disconnect();
 		$this->init_ajax_holaplex_connect();
+		$this->init_add_holaplex_customer_id_field();
+		$this->init_save_holaplex_customer_id_field();
 		$this->add_holaplex_menu_to_product_data_tabs();
 		$this->init_shortcode_handler();
 		$this->init_add_post_meta_options();
@@ -408,6 +408,7 @@ class Holaplex_Wp_Admin
 			$drop_image =  isset($_POST['drop_image']) ? sanitize_text_field($_POST['drop_image']) : '';
 			$drop_description = isset($_POST['drop_desc']) ? sanitize_text_field($_POST['drop_desc']) : '';
 			$drop_project_id = isset($_POST['project_id']) ? sanitize_text_field($_POST['project_id']) : '';
+			$total_minted = isset($_POST['total_minted']) ? sanitize_text_field($_POST['total_minted']) : '';
 			// create a product with price
 
 			$product = new WC_Product_Simple();
@@ -420,7 +421,16 @@ class Holaplex_Wp_Admin
 			// you can also add a full product description
 			$product->set_description($drop_description);
 
-			// $product->set_image_id( 90 );
+			// last 5 digits of drop_id
+			$product->set_sku(substr($drop_id, -5));
+
+			// Stock management at product level
+			$product->set_manage_stock( true );
+			$product->set_stock_quantity( $total_minted );
+			$product->set_backorders( 'no' ); 
+			$product->set_low_stock_amount( 1 );
+
+			$product->set_sold_individually( true );
 
 			$product->save();
 
