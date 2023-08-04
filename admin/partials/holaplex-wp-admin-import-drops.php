@@ -34,7 +34,7 @@
           foreach ($project['drops'] as $drop) {
             $project_name = $project['name'];
             $drop_id = substr($drop['id'], -6);
-            $drop_name = $drop['collection']['metadataJson']['name'];
+            $drop_name = isset( $drop['collection']) && isset($drop['collection']['metadataJson']) ? $drop['collection']['metadataJson']['name']: 'N/A';
             $collection_supply = $drop['collection']['supply'] - $drop['collection']['totalMints'];
             $drop_status = $drop['status'];
   

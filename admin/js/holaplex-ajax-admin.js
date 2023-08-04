@@ -99,7 +99,7 @@ jQuery(document).ready(function ($) {
         const dropName = this.dataset.dropName;
         const dropDesc = this.dataset.dropDesc;
         const dropImage = this.dataset.dropImage;
-        const totalMinted = this.dataset.totalMinted;
+        const totalSupply = this.dataset.totalSupply;
         const projectId = this.dataset.projectId;
         const nonce = this.dataset.wpNonce;
 
@@ -117,7 +117,7 @@ jQuery(document).ready(function ($) {
                 drop_name: dropName,
                 drop_desc: dropDesc,
                 drop_image: dropImage,
-                total_minted: totalMinted,
+                total_supply: totalSupply,
                 project_id: projectId
             },
             success: function (response) {

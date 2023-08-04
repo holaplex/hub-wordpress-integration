@@ -408,7 +408,7 @@ class Holaplex_Wp_Admin
 			$drop_image =  isset($_POST['drop_image']) ? sanitize_text_field($_POST['drop_image']) : '';
 			$drop_description = isset($_POST['drop_desc']) ? sanitize_text_field($_POST['drop_desc']) : '';
 			$drop_project_id = isset($_POST['project_id']) ? sanitize_text_field($_POST['project_id']) : '';
-			$total_minted = isset($_POST['total_minted']) ? sanitize_text_field($_POST['total_minted']) : '';
+			$total_supply = isset($_POST['total_supply']) ? sanitize_text_field($_POST['total_supply']) : '';
 			// create a product with price
 
 			$product = new WC_Product_Simple();
@@ -426,11 +426,9 @@ class Holaplex_Wp_Admin
 
 			// Stock management at product level
 			$product->set_manage_stock( true );
-			$product->set_stock_quantity( $total_minted );
+			$product->set_stock_quantity( $total_supply );
 			$product->set_backorders( 'no' ); 
 			$product->set_low_stock_amount( 1 );
-
-			$product->set_sold_individually( true );
 
 			$product->save();
 
@@ -666,6 +664,7 @@ class Holaplex_Wp_Admin
 				$drop_name = $drop['collection']['metadataJson']['name'];
 				$drop_description = $drop['collection']['metadataJson']['description'];
 				$drop_image = $drop['collection']['metadataJson']['image'];
+				$total_supply = $drop['collection']['supply'] - $drop['collection']['totalMints'];
 				// check if a woocommerce product exist with a metakey "drop_id" and meta-value $drop_id
 				$products = get_posts(array(
 					'post_type' => 'product',
@@ -679,7 +678,7 @@ class Holaplex_Wp_Admin
 				if (count($products) > 0) {
 					return '<span class="synced">Synced</span><button class="" id="remove-sync-btn">Remove</button>';
 				} else {
-					return '<button class="import-btn" data-project-id="' . esc_attr($project_id) . '" data-drop-image="' . esc_attr($drop_image) . '" data-drop-name="' . esc_attr($drop_name) . '" data-drop-desc="' . esc_attr($drop_description) . '"  data-wp-nonce="' . esc_attr($nonce) . '" data-drop-id="' . esc_attr($drop_id) . '">Import</button>';
+					return '<button class="import-btn" data-total-supply="'. esc_attr($total_supply) .'" data-project-id="' . esc_attr($project_id) . '" data-drop-image="' . esc_attr($drop_image) . '" data-drop-name="' . esc_attr($drop_name) . '" data-drop-desc="' . esc_attr($drop_description) . '"  data-wp-nonce="' . esc_attr($nonce) . '" data-drop-id="' . esc_attr($drop_id) . '">Import</button>';
 				}
 			}
 

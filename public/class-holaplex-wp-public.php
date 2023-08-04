@@ -143,7 +143,8 @@ class Holaplex_Wp_Public
 				// show message if drop supply is 0 
 				$drop =  $core->get_drop($project_id, $drop_id);
 				if ($drop && !empty($drop)) {
-					if ($drop['collection']['totalMints'] - $drop['collection']['supply'] < 1) {
+
+					if ((int)$drop['collection']['supply'] - (int)$drop['collection']['totalMints'] < 1) {
 						echo '<div class="holaplex-drop-warning">🪫 Drop supply is low</div>';
 					}
 				}
@@ -196,12 +197,8 @@ class Holaplex_Wp_Public
 					// create new customer and wallet
 					$created_wallet = $holaplex_api->create_customer_wallet($holaplex_project_id);
 
-					// hookbug('ProjectID'. $holaplex_project_id);
-					// hookbug('New API Customer Data: '. json_encode($created_wallet));
-					// hookbug('New Customer Data Entry');
 					$new_holaplex_customer_data = [];
 					$new_holaplex_customer_data[$holaplex_project_id] = $created_wallet;
-					// hookbug($new_holaplex_customer_data);
 					// update user meta key holaplex_customer_id
 					update_user_meta(get_current_user_id(), 'holaplex_customer_id', json_encode($new_holaplex_customer_data));
 
@@ -210,10 +207,7 @@ class Holaplex_Wp_Public
 
 				if (!array_key_exists($holaplex_project_id, $project_id_array)) {
 					$created_wallet = $holaplex_api->create_customer_wallet($holaplex_project_id);
-					// hookbug('New API Customer Data: '. json_encode($created_wallet));
 
-					// hookbug('ProjectID'. $holaplex_project_id);
-					// hookbug('Using Existing Customer Data Entry. Will add new wallet address');
 					$project_id_array[$holaplex_project_id] = $created_wallet;
 					// update user meta key holaplex_customer_id
 					update_user_meta(get_current_user_id(), 'holaplex_customer_id', json_encode($project_id_array));
