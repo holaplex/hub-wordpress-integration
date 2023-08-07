@@ -16,7 +16,7 @@
       <p class="description">
         Creates a product for each drop in your Holaplex projects.
       </p>
-  
+
       <ul class="responsive-table">
         <li class="table-header">
           <div class="col-1">Project</div>
@@ -34,26 +34,32 @@
           foreach ($project['drops'] as $drop) {
             $project_name = $project['name'];
             $drop_id = substr($drop['id'], -6);
-            $drop_name = isset( $drop['collection']) && isset($drop['collection']['metadataJson']) ? $drop['collection']['metadataJson']['name']: 'N/A';
+            $drop_name = isset($drop['collection']) && isset($drop['collection']['metadataJson']) ? $drop['collection']['metadataJson']['name'] : 'N/A';
             $collection_supply = $drop['collection']['supply'] - $drop['collection']['totalMints'];
             $drop_status = $drop['status'];
-  
-            echo '<li class="table-row">';
-            echo '<div class="col-1">' . esc_html($project_name) . '</div>';
-            echo '<div class="col-2">' . esc_html($drop_name) . '</div>';
-            echo '<div class="col-1">' . esc_html($collection_supply) . '</div>';
-            echo '<div class="col-1">' . esc_html($drop_status) . '</div>';
-            echo '<div class="col-1">' . showSyncActions($drop, $project['id']) . '</div>';
-            echo '</li>';
+
+        ?>
+
+            <li class="table-row">
+              <div class="col-1"><?php echo esc_html($project_name) ?></div>
+              <div class="col-2"><?php echo esc_html($drop_name) ?></div>
+              <div class="col-1"><?php echo esc_html($collection_supply) ?></div>
+              <div class="col-1"><?php echo esc_html($drop_status) ?></div>
+              <div class="col-1"><?php showSyncActions($drop, $project['id']) ?></div>
+            </li>
+
+
+        <?php
+
           }
         }
         ?>
       </ul>
-  
+
       <div class="modal__footer">
         <button class="btn btn-success" id="import-done">Done</button>
       </div>
-  
+
       <a href="#" class="modal__close">&times;</a>
     </div>
   </div>

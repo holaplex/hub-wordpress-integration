@@ -209,7 +209,7 @@ class Holaplex_Core
         }
       }
       $holaplex_project[$holaplex_project_id] = $holaplex_project_customer_wallet;
-      update_user_meta( get_current_user_id(), 'holaplex_customer_id', json_encode($holaplex_project));
+      update_user_meta( get_current_user_id(), 'holaplex_customer_id', wp_json_encode($holaplex_project));
       return $holaplex_project_customer_wallet;
     } else {
       return $holaplex_project_customer_wallet;

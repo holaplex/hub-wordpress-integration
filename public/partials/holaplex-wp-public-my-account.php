@@ -53,7 +53,7 @@
         <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
           <?php foreach ($nfts as $nft) { ?>
             <div class="flex flex-col rounded-md p-6">
-              <img class="rounded-md w-full aspect-square object-cover" src="<?php echo esc_attr($nft['collection']['metadataJson']['image']); ?>" alt="<?php echo esc_attr($nft['collection']['metadataJson']['name']); ?>">
+              <img class="rounded-md w-full aspect-square object-cover" src="<?php echo esc_url($nft['collection']['metadataJson']['image']); ?>" alt="<?php echo esc_attr($nft['collection']['metadataJson']['name']); ?>">
               <div class="flex justify-between mt-4">
                 <ul class="flex flex-col gap-2">
                   <li class="flex flex-col gap-1">
@@ -76,7 +76,7 @@
                 </ul>
                 <div class="nft-blockchain">
                   <a  target="_blank" href="https://solscan.io/token/<?php echo esc_attr($nft['address']); ?>">
-                    <img decoding="auto" width="30" height="30" src="<?php echo esc_attr(plugin_dir_url(__FILE__) . '../images/coins.png'); ?>" alt="Solscan"  />
+                    <img decoding="auto" width="30" height="30" src="<?php echo esc_url(plugin_dir_url(__FILE__) . '../images/coins.png'); ?>" alt="Solscan"  />
                   </a>
                 </div>
               </div>

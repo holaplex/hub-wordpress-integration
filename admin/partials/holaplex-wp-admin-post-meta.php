@@ -22,7 +22,7 @@ $holaplex_selected_page_id = get_post_meta($post->ID, 'holaplex_selected_page_id
 <div class="holaplex-app">
   <div class="bootstrap-wrapper">
     <?php 
-      // wp_nonce_field(HOLAPLEX_NONCE);
+      wp_nonce_field(HOLAPLEX_NONCE, '_holaplex_content_gate_nonce');
     ?>
     <div class="row">
       <div class="col-lg-4">

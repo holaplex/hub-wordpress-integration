@@ -1,4 +1,5 @@
 <div class="container-fluid holaplex-app">
+  <!-- wp nonce field -->
   <div class="row">
     <!-- two tabs -->
     <div class="col-md-12 col-sm-12 col-lg-6">
