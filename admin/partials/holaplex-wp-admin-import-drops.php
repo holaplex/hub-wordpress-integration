@@ -12,7 +12,7 @@
         return;
       }
       ?>
-      <h2><?php _e('Import Drops', 'holaplex-wp'); ?></h2>
+      <h2><?php esc_html_e('Import Drops', 'holaplex-wp'); ?></h2>
       <p class="description">
         Creates a product for each drop in your Holaplex projects.
       </p>

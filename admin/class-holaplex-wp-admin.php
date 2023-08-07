@@ -216,7 +216,7 @@ class Holaplex_Wp_Admin
 						<p class="holaplex_drop_id_field form-field">
 							<label for="_stock_status">Drops</label>
 							<span class="woocommerce-help-tip"></span>
-							<select style="" id="_holaplex_drop_project_ids" name="_holaplex_drop_project_id" class="select short">
+							<select id="_holaplex_drop_project_ids" name="_holaplex_drop_project_id" class="select short">
 								<option value="">Select a drop</option>
 								<?php foreach ($project_drops as $drop) {
 									$drop_id = $drop['id'];
@@ -318,11 +318,11 @@ class Holaplex_Wp_Admin
 		{
 			$holaplex_customer_id = get_user_meta($user->ID, 'holaplex_customer_id', true);
 		?>
-			<h3><?php _e('Holaplex Customer ID', 'holaplex-wp'); ?></h3>
+			<h3><?php esc_html_e('Holaplex Customer ID', 'holaplex-wp'); ?></h3>
 			<table class="form-table">
 				<tr>
 					<th>
-						<label for="holaplex_customer_id"><?php _e('Holaplex Customer ID', 'holaplex-wp'); ?></label>
+						<label for="holaplex_customer_id"><?php esc_html_e('Holaplex Customer ID', 'holaplex-wp'); ?></label>
 					</th>
 					<td>
 						<input readonly type="text" name="holaplex_customer_id" id="holaplex_customer_id" value="<?php echo esc_attr($holaplex_customer_id); ?>" class="regular-text" />

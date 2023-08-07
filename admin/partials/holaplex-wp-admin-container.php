@@ -14,11 +14,11 @@
     <section id="holaplex-setup" class="col-md-12 col-sm-12 col-lg-12 holaplex-tab-content active">
       <div class="row">
         <div class="col-lg-6">
-          <h2><?php _e('Holaplex Settings', 'holaplex-wp'); ?></h2>
+          <h2><?php esc_html_e('Holaplex Settings', 'holaplex-wp'); ?></h2>
           <table class="form-table">
             <tbody>
               <tr valign="top">
-                <th scope="row"><?php _e('Connection Status', 'holaplex-wp'); ?></th>
+                <th scope="row"><?php esc_html_e('Connection Status', 'holaplex-wp'); ?></th>
                 <td>
                   <div class="row">
                     <div class="col-6">
@@ -26,7 +26,7 @@
                     </div>
                     <?php if ($holaplex_status == '✅ connected') : ?>
                       <div class="col-6">
-                        <button id="holaplex-disconnect-btn" class="button button-secondary"><?php _e('Disconnect', 'holaplex-wp'); ?></button>
+                        <button id="holaplex-disconnect-btn" class="button button-secondary"><?php esc_html_e('Disconnect', 'holaplex-wp'); ?></button>
                       </div>
                     <?php endif; ?>
 
@@ -34,7 +34,7 @@
                 </td>
               </tr>
               <tr valign="top">
-                <th scope="row"><?php _e('Credits', 'holaplex-wp'); ?></th>
+                <th scope="row"><?php esc_html_e('Credits', 'holaplex-wp'); ?></th>
                 <td>
                   <div class="row">
                     <div class="col-6">
@@ -44,17 +44,17 @@
                 </td>
               </tr>
               <tr valign="top">
-                <th scope="row"><?php _e('Organization Id', 'holaplex-wp'); ?></th>
+                <th scope="row"><?php esc_html_e('Organization Id', 'holaplex-wp'); ?></th>
                 <td>
                   <input type="text" name="holaplex_org_id" value="<?php echo esc_attr(get_option('holaplex_org_id')); ?>">
-                  <p class="description"><?php _e('Enter Organization Id', 'holaplex-wp'); ?></p>
+                  <p class="description"><?php esc_html_e('Enter Organization Id', 'holaplex-wp'); ?></p>
                 </td>
               </tr>
               <tr valign="top">
-                <th scope="row"><?php _e('API Token', 'holaplex-wp'); ?></th>
+                <th scope="row"><?php esc_html_e('API Token', 'holaplex-wp'); ?></th>
                 <td>
                   <input type="text" name="holaplex_api_key" value="<?php echo esc_attr(get_option('holaplex_api_key')); ?>">
-                  <p class="description"><?php _e('Enter the API Token', 'holaplex-wp'); ?></p>
+                  <p class="description"><?php esc_html_e('Enter the API Token', 'holaplex-wp'); ?></p>
                 </td>
               </tr>
             </tbody>
