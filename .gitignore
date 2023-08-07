@@ -40,3 +40,6 @@ cache
 
 vendor
 release
+wp-var-analysis.txt
+wp-vip-go.txt
+wp-vip-min.txt
