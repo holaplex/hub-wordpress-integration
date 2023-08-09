@@ -161,11 +161,10 @@ class Holaplex_Wp_Public
 		$core = $this->core;
 		$holaplex_projects = $core->holaplex_projects;
 
-		function on_order_complete($order_status, $order_id, $holaplex_projects)
+		function on_order_complete($order_status, $order_id, $holaplex_projects, $core)
 		{
 			$order = wc_get_order($order_id);
 			$items = $order->get_items();
-			$holaplex_api = new Holaplex_Core();
 			$mint_status_message = '';
 
 			foreach ($items as $item) {
@@ -194,7 +193,7 @@ class Holaplex_Wp_Public
 
 				if (count($project_id_array) == 0) {
 					// create new customer and wallet
-					$created_wallet = $holaplex_api->create_customer_wallet($holaplex_project_id);
+					$created_wallet = $core->create_customer_wallet($holaplex_project_id);
 
 					$new_holaplex_customer_data = [];
 					$new_holaplex_customer_data[$holaplex_project_id] = $created_wallet;
@@ -205,27 +204,26 @@ class Holaplex_Wp_Public
 				}
 
 				if (!array_key_exists($holaplex_project_id, $project_id_array)) {
-					$created_wallet = $holaplex_api->create_customer_wallet($holaplex_project_id);
+					$created_wallet = $core->create_customer_wallet($holaplex_project_id);
 
 					$project_id_array[$holaplex_project_id] = $created_wallet;
 					// update user meta key holaplex_customer_id
 					update_user_meta(get_current_user_id(), 'holaplex_customer_id', wp_json_encode($project_id_array));
 				}
 
-				$holaplex_project_customer_wallet = $holaplex_api->ensure_wallet_or_create_recursively($project_id_array, $holaplex_project_id)['wallet_address'];
-				hookbug('Detected Customer Data ->' . wp_json_encode($holaplex_project_customer_wallet));
+				$holaplex_project_customer_wallet = $core->ensure_wallet_or_create_recursively($project_id_array, $holaplex_project_id)['wallet_address'];
+
 				if ($holaplex_project_customer_wallet != '' && $holaplex_project_customer_wallet != null) {
-					$drop_is_minted = $holaplex_api->mint_drop($holaplex_project_customer_wallet, $holaplex_drop_id);
-					hookbug('Drop Minted: ' . $drop_is_minted);
-					hookbug($drop_is_minted);
+					$drop_is_minted = $core->mint_drop($holaplex_project_customer_wallet, $holaplex_drop_id);
+					
 					$order->update_meta_data( 'holaplex_mint_drop_status', !empty($mint_status_message) ? $mint_status_message : 'Drop(s) minted successfully' );
 					$order->save();
 				}
 			}
 		}
 
-		add_action('woocommerce_payment_complete_order_status', function ($order_status, $order_id) use ($holaplex_projects) {
-			on_order_complete($order_status, $order_id, $holaplex_projects);
+		add_action('woocommerce_payment_complete_order_status', function ($order_status, $order_id) use ($holaplex_projects, $core) {
+			on_order_complete($order_status, $order_id, $holaplex_projects, $core);
 		}, 10, 2);
 	}
 
@@ -291,12 +289,12 @@ class Holaplex_Wp_Public
 	public function init_replace_post_content()
 	{
 
-		function holaplex_replace_post_content($content)
+		$core = $this->core;
+		function holaplex_replace_post_content($content, $core)
 		{
 			global $post;
-			$product_id = $post->holaplex_product_select;
+			$product_id = get_post_meta($post->ID, 'holaplex_product_select', true);
 			$current_user = wp_get_current_user();
-			$core = new Holaplex_Core();
 			$custom_text = $core->holaplex_display_custom_text();
 
 			// fading excerpt preview
@@ -331,7 +329,9 @@ class Holaplex_Wp_Public
 			return $content;
 		}
 
-		add_filter('the_content', 'holaplex_replace_post_content');
+		add_filter('the_content', function ($content) use ($core) {
+			return holaplex_replace_post_content($content, $core);
+		});
 	}
 
 	public function init_content_gate_redirect()
