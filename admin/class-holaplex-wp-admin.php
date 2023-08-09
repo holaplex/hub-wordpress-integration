@@ -473,7 +473,7 @@ class Holaplex_Wp_Admin
 		{
 
 			// check nonce
-			$nonce = isset($_REQUEST['_wpnonce']) ? sanitize_text_field($_REQUEST['_wpnonce']) : '';
+			$nonce = isset($_REQUEST['_holaplex_nonce']) ? sanitize_text_field($_REQUEST['_holaplex_nonce']) : '';
 			if (!wp_verify_nonce($nonce, HOLAPLEX_NONCE)) {
 				wp_send_json_error(null, 500);
 			}
