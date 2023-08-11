@@ -141,6 +141,8 @@ class Holaplex_Wp_Admin
 			$project_id = isset($_POST['project_id']) ? sanitize_text_field($_POST['project_id']) : null;
 			$drop_id = isset($_POST['drop_id']) ? sanitize_text_field($_POST['drop_id']) : null;
 			$post_id = isset($_POST['post_id']) ? sanitize_text_field($_POST['post_id']) : null;
+			$blockchain = isset($_POST['blockchain']) ? sanitize_text_field($_POST['blockchain']) : null;
+
 			$holaplex_product_add_to_cart_on_low = isset($_POST['holaplex_product_add_to_cart_on_low']) ? sanitize_text_field($_POST['holaplex_product_add_to_cart_on_low']) : null;
 
 			if (!$project_id || !$drop_id || !$post_id) {
@@ -150,6 +152,7 @@ class Holaplex_Wp_Admin
 
 			update_post_meta($post_id, 'holaplex_drop_id', $drop_id);
 			update_post_meta($post_id, 'holaplex_project_id', $project_id);
+			update_post_meta($post_id, 'holaplex_drop_blockchain', $blockchain);
 			update_post_meta($post_id, 'holaplex_product_add_to_cart_on_low', $holaplex_product_add_to_cart_on_low);
 		}
 
@@ -227,6 +230,7 @@ class Holaplex_Wp_Admin
 									$drop_id = $drop['id'];
 									$drop_name = $drop['collection']['metadataJson']['name'];
 									$collection_supply = $drop['collection']['supply'] - $drop['collection']['totalMints'];
+									$blockchain = $drop['collection']['blockchain'];
 									$drop_status = $drop['status'];
 									$drop_project_id = $drop['project_id'];
 
@@ -241,7 +245,7 @@ class Holaplex_Wp_Admin
 									}
 								?>
 
-									<option <?php echo esc_attr($current_drop_id) === $drop_id ? 'selected' : null; ?> value="<?php echo esc_attr("$drop_id|$drop_project_id"); ?>"><?php echo esc_html("🖼️$drop_name -Supply: $collection_supply -Status: $drop_status"); ?></option>
+									<option <?php echo esc_attr($current_drop_id) === $drop_id ? 'selected' : null; ?> value="<?php echo esc_attr("$drop_id|$drop_project_id|$blockchain"); ?>"><?php echo esc_html("🖼️$drop_name -Supply: $collection_supply -Status: $drop_status"); ?></option>
 								<?php } ?>
 							</select>
 						</p>
@@ -252,7 +256,7 @@ class Holaplex_Wp_Admin
 							
 						</p>
 						<p class="holaplex_tab_submit_data form-field">
-							<button data-wp-nonce="<?php echo esc_attr($nonce); ?>" type="button" class="button button-primary button-large" id="holaplex_tab_submit_data">Submit</button>
+							<button data-wp-nonce="<?php echo esc_attr($nonce); ?>" type="button" class="button button-primary button-large" id="holaplex_tab_submit_data_button">Submit</button>
 						</p>
 				<?php
 
@@ -399,6 +403,7 @@ class Holaplex_Wp_Admin
 			$drop_description = isset($_POST['drop_desc']) ? sanitize_text_field($_POST['drop_desc']) : '';
 			$drop_project_id = isset($_POST['project_id']) ? sanitize_text_field($_POST['project_id']) : '';
 			$total_supply = isset($_POST['total_supply']) ? sanitize_text_field($_POST['total_supply']) : '';
+			$blockchain = isset($_POST['blockchain']) ? sanitize_text_field($_POST['blockchain']) : '';
 			// create a product with price
 
 			$product = new WC_Product_Simple();
@@ -428,6 +433,7 @@ class Holaplex_Wp_Admin
 			// add drop_id to product meta
 			update_post_meta($product_id, 'holaplex_drop_id', $drop_id);
 			update_post_meta($product_id, 'holaplex_project_id', $drop_project_id);
+			update_post_meta($product_id, 'holaplex_drop_blockchain', $blockchain);
 			update_post_meta($product_id, '_regular_price', "0.01");
 
 

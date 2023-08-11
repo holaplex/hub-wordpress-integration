@@ -55,7 +55,7 @@ jQuery(document).ready(function ($) {
             }
         });
     });
-    $('#holaplex_tab_submit_data').on('click', function (e) {
+    $('#holaplex_tab_submit_data button').on('click', function (e) {
         e.preventDefault();
         const ele = $(this);
 
@@ -64,6 +64,7 @@ jQuery(document).ready(function ($) {
         drop_project_id = drop_project_id.split('|');
         const drop_id = drop_project_id[0];
         const projectId = drop_project_id[1];
+        const blockchain = drop_project_id[2];
         // url query param for post
         const urlParams = new URLSearchParams(window.location.search);
         const postId = urlParams.get('post');
@@ -80,7 +81,8 @@ jQuery(document).ready(function ($) {
                 drop_id: drop_id,
                 _wpnonce: nonce,
                 project_id: projectId,
-                post_id: postId
+                post_id: postId,
+                blockchain
             },
             success: function (response) {
                 // Handle the successful AJAX response
@@ -105,6 +107,7 @@ jQuery(document).ready(function ($) {
         const dropDesc = this.dataset.dropDesc;
         const dropImage = this.dataset.dropImage;
         const totalSupply = this.dataset.totalSupply;
+        const blockchain = this.dataset.blockchain;
         const projectId = this.dataset.projectId;
         const nonce = this.dataset.wpNonce;
 
@@ -122,6 +125,7 @@ jQuery(document).ready(function ($) {
                 drop_name: dropName,
                 drop_desc: dropDesc,
                 drop_image: dropImage,
+                blockchain,
                 total_supply: totalSupply,
                 project_id: projectId
             },

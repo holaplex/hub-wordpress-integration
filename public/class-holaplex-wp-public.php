@@ -174,8 +174,7 @@ class Holaplex_Wp_Public
 				$holaplex_drop_id = get_post_meta($product_id, 'holaplex_drop_id', true);
 				$holaplex_project_id = get_post_meta($product_id, 'holaplex_project_id', true);
 
-				$drop =  $core->get_drop($holaplex_project_id, $holaplex_drop_id);
-				$blockchain = $drop['collection']['blockchain'];
+				$blockchain = get_post_meta($product_id, 'holaplex_drop_blockchain', true);
 				$asset_list = [
 					'ETHEREUM' => 'ETH',
 					'POLYGON' => 'MATIC',
@@ -226,11 +225,16 @@ class Holaplex_Wp_Public
 
 				$holaplex_project_customer_wallet = $core->ensure_wallet_or_create_recursively($project_id_array, $holaplex_project_id, $asset_type)['wallet_address'];
 				$mint_cart_id = "$holaplex_project_customer_wallet$holaplex_drop_id$quantity";
-				// hookbug("Previeous Mint Cart ID: $core->$mint_cart_id");
-				// hookbug("New Mint Cart ID: $mint_cart_id");
+				
 				if ($holaplex_project_customer_wallet != '' && $holaplex_project_customer_wallet != null && $core->$mint_cart_id !== $mint_cart_id) {
-					hookbug("Calling Mint");
+
 					$drop_is_minted = $core->mint_drop($holaplex_project_customer_wallet, $holaplex_drop_id, $quantity);
+					
+					// $drop_is_minted is an array. check if any items are false
+					if (is_array($drop_is_minted) && in_array(false, $drop_is_minted)) {
+						$drop_is_minted = false;
+					}
+					
 					if ($drop_is_minted) {
 						$core->$mint_cart_id = $mint_cart_id;	
 						$order->update_meta_data( 'holaplex_mint_drop_status', !empty($mint_status_message) ? $mint_status_message : 'Drop(s) minted successfully' );
@@ -239,10 +243,7 @@ class Holaplex_Wp_Public
 						$order->update_meta_data( 'holaplex_mint_drop_status', 'Error minting drop(s)' );
 						$order->save();
 					}
-				} else {
-					sleep(1);
-					hookbug($mint_cart_id);
-				}
+				} 
 			}
 		}
 
