@@ -50,14 +50,13 @@ class Holaplex_Wp_Public
 	 * @param      string    $plugin_name       The name of the plugin.
 	 * @param      string    $version    The version of this plugin.
 	 */
-	public function __construct($plugin_name, $version)
+	public function __construct($plugin_name, $version, $core)
 	{
 
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
 
-		$this->core = new Holaplex_Core();
-		$this->core->login_to_holaplex();
+		$this->core = $core;
 
 		$this->mint_drop_on_order_complete();
 		$this->init_display_nft_tab_on_my_account();
@@ -168,9 +167,21 @@ class Holaplex_Wp_Public
 			$mint_status_message = '';
 
 			foreach ($items as $item) {
+				$item_data = $item->get_data();
+				$quantity = $item_data['quantity'];
+
 				$product_id = $item->get_product_id();
 				$holaplex_drop_id = get_post_meta($product_id, 'holaplex_drop_id', true);
 				$holaplex_project_id = get_post_meta($product_id, 'holaplex_project_id', true);
+
+				$drop =  $core->get_drop($holaplex_project_id, $holaplex_drop_id);
+				$blockchain = $drop['collection']['blockchain'];
+				$asset_list = [
+					'ETHEREUM' => 'ETH',
+					'POLYGON' => 'MATIC',
+					'SOLANA' => 'SOL',
+				];
+				$asset_type = $asset_list[$blockchain];
 
 				$project_ids = array_map(function ($project) {
 					return $project['id'];
@@ -178,13 +189,13 @@ class Holaplex_Wp_Public
 
 				// check if holaplex_project_id is in project_ids
 				if (!in_array($holaplex_project_id, $project_ids)) {
-					$mint_status_message = 'Skipped minting for one or more drops. Please check Holaplex Hub Settings';
+					$mint_status_message .= "Skipped minting for this drop. Please check Holaplex Hub Settings. Project with ID $holaplex_project_id not found\n";
 					continue;
 				}				
 
 				// get current logged in user meta key holaplex_customer_id
 				$holaplex_customer_data = get_user_meta(get_current_user_id(), 'holaplex_customer_id', true);
-				// split holaplex_customer_id into array
+
 				if ($holaplex_customer_data != '') {
 					$project_id_array = json_decode($holaplex_customer_data, true);
 				} else {
@@ -193,7 +204,7 @@ class Holaplex_Wp_Public
 
 				if (count($project_id_array) == 0) {
 					// create new customer and wallet
-					$created_wallet = $core->create_customer_wallet($holaplex_project_id);
+					$created_wallet = $core->create_customer_wallet($holaplex_project_id, '', $asset_type);
 
 					$new_holaplex_customer_data = [];
 					$new_holaplex_customer_data[$holaplex_project_id] = $created_wallet;
@@ -204,20 +215,33 @@ class Holaplex_Wp_Public
 				}
 
 				if (!array_key_exists($holaplex_project_id, $project_id_array)) {
-					$created_wallet = $core->create_customer_wallet($holaplex_project_id);
+					$created_wallet = $core->create_customer_wallet($holaplex_project_id, '', $asset_type);
 
 					$project_id_array[$holaplex_project_id] = $created_wallet;
 					// update user meta key holaplex_customer_id
 					update_user_meta(get_current_user_id(), 'holaplex_customer_id', wp_json_encode($project_id_array));
 				}
 
-				$holaplex_project_customer_wallet = $core->ensure_wallet_or_create_recursively($project_id_array, $holaplex_project_id)['wallet_address'];
 
-				if ($holaplex_project_customer_wallet != '' && $holaplex_project_customer_wallet != null) {
-					$drop_is_minted = $core->mint_drop($holaplex_project_customer_wallet, $holaplex_drop_id);
-					
-					$order->update_meta_data( 'holaplex_mint_drop_status', !empty($mint_status_message) ? $mint_status_message : 'Drop(s) minted successfully' );
-					$order->save();
+
+				$holaplex_project_customer_wallet = $core->ensure_wallet_or_create_recursively($project_id_array, $holaplex_project_id, $asset_type)['wallet_address'];
+				$mint_cart_id = "$holaplex_project_customer_wallet$holaplex_drop_id$quantity";
+				// hookbug("Previeous Mint Cart ID: $core->$mint_cart_id");
+				// hookbug("New Mint Cart ID: $mint_cart_id");
+				if ($holaplex_project_customer_wallet != '' && $holaplex_project_customer_wallet != null && $core->$mint_cart_id !== $mint_cart_id) {
+					hookbug("Calling Mint");
+					$drop_is_minted = $core->mint_drop($holaplex_project_customer_wallet, $holaplex_drop_id, $quantity);
+					if ($drop_is_minted) {
+						$core->$mint_cart_id = $mint_cart_id;	
+						$order->update_meta_data( 'holaplex_mint_drop_status', !empty($mint_status_message) ? $mint_status_message : 'Drop(s) minted successfully' );
+						$order->save();
+					} else {
+						$order->update_meta_data( 'holaplex_mint_drop_status', 'Error minting drop(s)' );
+						$order->save();
+					}
+				} else {
+					sleep(1);
+					hookbug($mint_cart_id);
 				}
 			}
 		}
@@ -286,9 +310,8 @@ class Holaplex_Wp_Public
 
 	}
 
-	public function init_replace_post_content()
+	public function init_replace_post_content()	
 	{
-
 		$core = $this->core;
 		function holaplex_replace_post_content($content, $core)
 		{

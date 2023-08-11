@@ -52,14 +52,19 @@ class Holaplex_Wp_Admin
 	private $holaplex_status = '⛔ disconnected';
 	private $holaplex_projects = [];
 	private $holaplex_org_credits = 0;
-
-	public function __construct($plugin_name, $version)
+	private $core;
+	public function __construct($plugin_name, $version, $core)
 	{
 
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
 		$this->add_wc_products_drop_id_filter();
-		$this->login_to_holaplex();
+
+		$this->holaplex_status = $core->holaplex_status;
+		$this->holaplex_projects = $core->holaplex_projects;
+		$this->holaplex_org_credits = $core->holaplex_org_credits;
+		$this->core = $core;
+
 		$this->add_holaplex_menu();
 		$this->init_ajax_sync_product_with_drop();
 		$this->init_ajax_sync_drop_id_with_product();
@@ -519,74 +524,6 @@ class Holaplex_Wp_Admin
 		add_action('wp_ajax_nopriv_holaplex_disconnect', 'holaplex_disconnect_callback');
 	}
 
-	public function register_ajax_route()
-	{
-	}
-
-	private function login_to_holaplex()
-	{
-		$id = get_option('holaplex_org_id');
-		$holaplex_api_key = get_option('holaplex_api_key');
-
-		if (!$id || !$holaplex_api_key || empty($id) || empty($holaplex_api_key)) {
-			return false;
-		}
-
-		$query = <<<'EOT'
-		query getOrg($id: UUID!) {
-			organization(id: $id) {
-				credits {
-					id
-					balance
-				}
-				projects {
-					id
-					name
-					drops {
-						id
-						projectId
-						creationStatus
-						startTime
-						endTime
-						price
-						createdAt
-						shutdownAt
-						collection {
-							id
-							supply
-							totalMints
-							metadataJson {
-								id
-								name
-								image
-								description
-								symbol
-							}
-						}
-						status
-					}
-				}
-			}
-		}
-		EOT;
-
-		$variables = [
-			'id' => $id,
-		];
-
-		$core = new Holaplex_Core();
-		$response = $core->send_graphql_request($query, $variables, $holaplex_api_key);
-
-		if ($response) {
-			$this->holaplex_status = '✅ connected';
-			$this->holaplex_projects =  $response['data']['organization']['projects'];
-			$this->holaplex_org_credits = $response['data']['organization']['credits']['balance'];
-		} else {
-			$this->holaplex_status = '⛔ disconnected';
-			$this->holaplex_projects = [];
-		}
-	}
-
 	public function add_holaplex_menu()
 	{
 
@@ -603,9 +540,8 @@ class Holaplex_Wp_Admin
 			$holaplex_status = $this->holaplex_status;
 			$holaplex_credits = $this->holaplex_org_credits;
 
-			$core = new Holaplex_Core();
-			$holaplex_display_custom_text = $core->holaplex_display_custom_text();
-			$holaplex_excerpt_length = $core->holaplex_excerpt_length();
+			$holaplex_display_custom_text = $this->core->holaplex_display_custom_text();
+			$holaplex_excerpt_length = $this->core->holaplex_excerpt_length();
 
 			$project_drops = [];
 			foreach ($holaplex_projects as $project) {
@@ -653,6 +589,7 @@ class Holaplex_Wp_Admin
 			{
 				$drop_id = $drop['id'];
 				$drop_name = $drop['collection']['metadataJson']['name'];
+				$blockchain = isset($drop['collection']) && isset($drop['collection']['blockchain']) ? $drop['collection']['blockchain'] : 'N/A';
 				$drop_description = $drop['collection']['metadataJson']['description'];
 				$drop_image = $drop['collection']['metadataJson']['image'];
 				$total_supply = $drop['collection']['supply'] - $drop['collection']['totalMints'];
@@ -669,7 +606,7 @@ class Holaplex_Wp_Admin
 				if (count($products) > 0) {
 					echo '<span class="synced">Synced</span><button class="" id="remove-sync-btn">Remove</button>';
 				} else {
-					echo '<button class="import-btn" data-total-supply="'. esc_attr($total_supply) .'" data-project-id="' . esc_attr($project_id) . '" data-drop-image="' . esc_attr($drop_image) . '" data-drop-name="' . esc_attr($drop_name) . '" data-drop-desc="' . esc_attr($drop_description) . '"  data-wp-nonce="' . esc_attr($nonce) . '" data-drop-id="' . esc_attr($drop_id) . '">Import</button>';
+					echo '<button class="import-btn" data-blockchain="'.esc_attr($blockchain).'" data-total-supply="'. esc_attr($total_supply) .'" data-project-id="' . esc_attr($project_id) . '" data-drop-image="' . esc_attr($drop_image) . '" data-drop-name="' . esc_attr($drop_name) . '" data-drop-desc="' . esc_attr($drop_description) . '"  data-wp-nonce="' . esc_attr($nonce) . '" data-drop-id="' . esc_attr($drop_id) . '">Import</button>';
 				}
 			}
 
@@ -716,11 +653,11 @@ class Holaplex_Wp_Admin
 			/**
 			 * shortcode to display content only if the user has purchased the product with required ID
 			 */
-			function holaplex_show_content($atts = [], $content = null)
+			$core = $this->core;
+			function holaplex_show_content($atts = [], $content = null, $core)
 			{
 				global $post;
 				$atts = array_change_key_case((array) $atts, CASE_LOWER);
-				$core = new Holaplex_Core();
 
 				$output = '';
 				$output .= '<div class="holaplex-box">';
@@ -749,14 +686,12 @@ class Holaplex_Wp_Admin
 
 				return $output;
 			}
-
-
-			function holaplex_shortcodes_init()
-			{
-				add_shortcode('holaplexcode', 'holaplex_show_content');
-			}
-
-			add_action('init', 'holaplex_shortcodes_init');
+			
+			add_action('init', function () use ($core){
+				add_shortcode('holaplexcode', function ($atts, $content) use ($core) {
+					return holaplex_show_content($atts, $content, $core);
+				});
+			});
 		}
 
 		public function init_add_post_content_gate_meta_box()

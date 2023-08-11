@@ -21,6 +21,7 @@
         <li class="table-header">
           <div class="col-1">Project</div>
           <div class="col-2">Drop name</div>
+          <div class="col-1">Blockchain</div>
           <div class="col-1">Supply</div>
           <div class="col-1">Status</div>
           <div class="col-1">Import</div>
@@ -34,6 +35,7 @@
           foreach ($project['drops'] as $drop) {
             $project_name = $project['name'];
             $drop_id = substr($drop['id'], -6);
+            $blockchain = isset($drop['collection']) && isset($drop['collection']['blockchain']) ? $drop['collection']['blockchain'] : 'N/A';
             $drop_name = isset($drop['collection']) && isset($drop['collection']['metadataJson']) ? $drop['collection']['metadataJson']['name'] : 'N/A';
             $collection_supply = $drop['collection']['supply'] - $drop['collection']['totalMints'];
             $drop_status = $drop['status'];
@@ -43,6 +45,7 @@
             <li class="table-row">
               <div class="col-1"><?php echo esc_html($project_name) ?></div>
               <div class="col-2"><?php echo esc_html($drop_name) ?></div>
+              <div class="col-1"><?php echo esc_html($blockchain) ?></div>
               <div class="col-1"><?php echo esc_html($collection_supply) ?></div>
               <div class="col-1"><?php echo esc_html($drop_status) ?></div>
               <div class="col-1"><?php showSyncActions($drop, $project['id']) ?></div>

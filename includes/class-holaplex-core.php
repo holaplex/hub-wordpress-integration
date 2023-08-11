@@ -9,6 +9,8 @@ class Holaplex_Core
 	public $holaplex_projects = [];
 	public $holaplex_org_credits = 0;
 
+  public $mint_cart_id = "";
+
   public function __construct() {
     $this->login_to_holaplex();
   }
@@ -155,11 +157,12 @@ class Holaplex_Core
           printf('<div class="%1$s"><p>%2$s</p></div>', esc_attr($class), esc_html($message));
         });
       }
+      hookbug($response_body);
       return false;
     }
   }
 
-  public function mint_drop($holaplex_customer_wallet_address, $holaplex_drop_id)
+  public function mint_drop($holaplex_customer_wallet_address, $holaplex_drop_id, $quantity = 1)
   {
     $holaplex_api_key = get_option('holaplex_api_key');
 
@@ -180,12 +183,18 @@ class Holaplex_Core
         'recipient' => $holaplex_customer_wallet_address
       ]
     ];
-    $wallet_response = $this->send_graphql_request($query, $variables, $holaplex_api_key);
+
+    // send request $quantity times
+    for ($i = 0; $i < $quantity; $i++) {
+      $wallet_response = $this->send_graphql_request($query, $variables, $holaplex_api_key);
+      sleep(1);
+    }
+
 
     return $wallet_response;
   }
 
-  public function ensure_wallet_or_create_recursively($holaplex_project, $holaplex_project_id, $count = 0)
+  public function ensure_wallet_or_create_recursively($holaplex_project, $holaplex_project_id, $asset_type, $count = 0)
   {
     $holaplex_project_customer_wallet = $holaplex_project[$holaplex_project_id] ?? [];
     // check if $holaplex_project_customer_wallet has valid values for customer_id and wallet_address
@@ -194,14 +203,14 @@ class Holaplex_Core
 
       $customer_id = !empty($holaplex_project_customer_wallet['customer_id']) ? $holaplex_project_customer_wallet['customer_id'] : '';
 
-      $holaplex_project_customer_wallet = $this->create_customer_wallet($holaplex_project_id, $customer_id);
+      $holaplex_project_customer_wallet = $this->create_customer_wallet($holaplex_project_id, $customer_id, $asset_type);
 
       // check if values are valid, if not recursively call this function again after a timeout of 1 second
       if (empty($holaplex_project_customer_wallet['customer_id']) || empty($holaplex_project_customer_wallet['wallet_address'])) {
         sleep(2);
-        if ($count < 1) {
+        if ($count < 2) {
           $count++;
-          $this->ensure_wallet_or_create_recursively($holaplex_project, $holaplex_project_id, $count);
+          $this->ensure_wallet_or_create_recursively($holaplex_project, $holaplex_project_id, $asset_type, $count);
           return;
         } else {
           hookbug("Holaplex: Unable to create customer wallet after $count attempts");
@@ -216,7 +225,7 @@ class Holaplex_Core
     }
   }
 
-  public function create_customer_wallet($holaplex_project_id, $holaplex_project_customer_id = '')
+  public function create_customer_wallet($holaplex_project_id, $holaplex_project_customer_id = '', $asset_type)
   {
 
     if (empty($holaplex_project_customer_id)) {
@@ -246,6 +255,7 @@ class Holaplex_Core
       $customer_id = $holaplex_project_customer_id;
     }
 
+    sleep(3);
 
     $create_wallet_query = <<<'EOT'
 				mutation CreateCustomerWallet($input: CreateCustomerWalletInput!) {
@@ -260,20 +270,20 @@ class Holaplex_Core
     $create_wallet_variables = [
       'input' => [
         'customer' => $customer_id,
-        "assetType" => "SOL"
+        "assetType" => $asset_type
       ],
     ];
 
-    $response = $this->send_graphql_request($create_wallet_query, $create_wallet_variables, get_option('holaplex_api_key'));
+    $wallet_response = $this->send_graphql_request($create_wallet_query, $create_wallet_variables, get_option('holaplex_api_key'));
 
-    $wallet_address = $response['data']['createCustomerWallet']['wallet']['address'];
+    $wallet_address = $wallet_response['data']['createCustomerWallet']['wallet']['address'];
+    hookbug($create_wallet_variables);
 
     // Example response
     $response = array(
       'customer_id' => $customer_id,
       'wallet_address' => $wallet_address
     );
-
 
     return $response;
   }

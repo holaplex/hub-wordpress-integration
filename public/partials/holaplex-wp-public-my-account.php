@@ -22,31 +22,34 @@
 
 
 <div class="holaplex-public-app">
-  
+
   <!-- This file should primarily consist of HTML with a little bit of PHP. -->
   <h4>My NFTs</h4>
   <?php
 
-    $customer_nfts = $core->get_customer_nfts();
-    $nfts = [];
-    foreach ($customer_nfts as $customer_drop_list) {
+  $customer_nfts = $core->get_customer_nfts();
+  $nfts = [];
+  foreach ($customer_nfts as $customer_drop_list) {
 
-      if (isset($customer_drop_list) && !empty($customer_drop_list) ) {
-        $mints = $customer_drop_list['data']['project']['customer']['mints'];
-        foreach($mints as $mint) {
+    if (isset($customer_drop_list) && !empty($customer_drop_list)) {
+      $mints = $customer_drop_list['data']['project']['customer']['mints'];
+      if (isset($mints) && !empty($mints)) {
+
+        foreach ($mints as $mint) {
           $nfts[] = $mint;
         }
       }
     }
+  }
 
-    if (empty($nfts)) {
-      echo '<p>You have no NFTs yet.</p>';
-      return;
-    }
-  
+  if (empty($nfts)) {
+    echo '<p>You have no NFTs yet.</p>';
+    return;
+  }
+
   ?>
-  
-  
+
+
   <section class="flex flex-col gap-8 items-center mt-8">
     <article class="w-full flex-grow">
       <div class="h-full flex flex-col flex-1">
@@ -59,9 +62,9 @@
                   <li class="flex flex-col gap-1">
                     <span class="text-gray-400">Name</span>
                     <span>
-                    <a  target="_blank" href="https://solscan.io/token/<?php echo esc_attr($nft['address']); ?>">
-                      <?php echo esc_attr($nft['collection']['metadataJson']['name']); ?>
-                    </a>
+                      <a target="_blank" href="https://solscan.io/token/<?php echo esc_attr($nft['address']); ?>">
+                        <?php echo esc_attr($nft['collection']['metadataJson']['name']); ?>
+                      </a>
                     </span>
                   </li>
                   <li class="flex flex-col gap-1">
@@ -75,8 +78,8 @@
                   </li>
                 </ul>
                 <div class="nft-blockchain">
-                  <a  target="_blank" href="https://solscan.io/token/<?php echo esc_attr($nft['address']); ?>">
-                    <img decoding="auto" width="30" height="30" src="<?php echo esc_url(plugin_dir_url(__FILE__) . '../images/coins.png'); ?>" alt="Solscan"  />
+                  <a target="_blank" href="https://solscan.io/token/<?php echo esc_attr($nft['address']); ?>">
+                    <img decoding="auto" width="30" height="30" src="<?php echo esc_url(plugin_dir_url(__FILE__) . '../images/coins.png'); ?>" alt="Solscan" />
                   </a>
                 </div>
               </div>
