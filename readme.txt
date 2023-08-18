@@ -4,7 +4,7 @@ Tags: woocommerce, holaplex, nft, integration
 Requires at least: 6.1
 Tested up to: 6.3
 Requires PHP: 7.0
-Stable tag: 1.0.43
+Stable tag: 1.0.44
 License: MIT License
 License URI: https://opensource.org/licenses/MIT
 
