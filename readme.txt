@@ -1,5 +1,5 @@
 === Holaplex Hub ===
-Contributors: k0d3d
+Contributors: k0d3d, holaplex
 Tags: woocommerce, holaplex, nft, integration
 Requires at least: 6.1
 Tested up to: 6.3
