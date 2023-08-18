@@ -13,7 +13,7 @@
  * @package           Holaplex_Wp
  *
  * @wordpress-plugin
- * Plugin Name:       Holaplex Integration Plugin for WordPress
+ * Plugin Name:       Holaplex Hub
  * Plugin URI:        http://holaplex.com/holaplex-wp/
  * Description:       This plugin allows you to sync and mint NFTs created on Holaplex directly through your WordPress site.
  * Version:           1.0.44
