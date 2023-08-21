@@ -14,7 +14,7 @@
       </div>
     </div>
   </div>
-  <div class="row" style="height: 100%;">
+  <div class="row" style="height: 100%; max-height: 1128px;">
     <section id="holaplex-setup" class="col-md-12 col-sm-12 col-lg-12 holaplex-tab-content active">
       <div class="row">
         <div class="col-lg-6">
@@ -85,21 +85,21 @@
     <section id="holaplex-drops" class="col-md-12 col-sm-12 col-lg-12 holaplex-tab-content">
       <h2 style="margin-bottom: 0;"><?php echo esc_html(__('Drops', 'holaplex-wp')); ?></h2>
       <div class="row">
-        <div class="col-lg-9 col-md-11">
+        <div class="col-lg-11 col-md-11">
           <div class="row">
             <div class="col-md-6">
               <h4 class="description">
                 Import your Holaplex Hub Drops as products to make them available to sell or claim through your store.
               </h4>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-5">
               <div class="header-actions">
                 <a href="#drops-modal" class="btn btn-primary align-self-right">Import drops</a>
               </div>
             </div>
           </div>
           <div class="row">
-            <div class="col-md-10">
+            <div class="col-md-11">
               <ul class="responsive-table">
                 <li class="table-header">
                   <div class="col-3">Name</div>
