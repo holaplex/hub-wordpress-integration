@@ -92,14 +92,14 @@
                 Import your Holaplex Hub Drops as products to make them available to sell or claim through your store.
               </h4>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-4">
               <div class="header-actions">
                 <a href="#drops-modal" class="btn btn-primary align-self-right">Import drops</a>
               </div>
             </div>
           </div>
           <div class="row">
-            <div class="col-md-9">
+            <div class="col-md-10">
               <ul class="responsive-table">
                 <li class="table-header">
                   <div class="col-3">Name</div>
