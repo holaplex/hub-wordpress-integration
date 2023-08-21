@@ -85,7 +85,7 @@
     <section id="holaplex-drops" class="col-md-12 col-sm-12 col-lg-12 holaplex-tab-content">
       <h2 style="margin-bottom: 0;"><?php echo esc_html(__('Drops', 'holaplex-wp')); ?></h2>
       <div class="row">
-        <div class="col-lg-8 col-md-10">
+        <div class="col-lg-9 col-md-11">
           <div class="row">
             <div class="col-md-6">
               <h4 class="description">
