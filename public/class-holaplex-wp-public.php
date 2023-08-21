@@ -63,6 +63,7 @@ class Holaplex_Wp_Public
 		$this->init_replace_post_content();
 		$this->init_content_gate_redirect();
 		$this->show_drop_after_product_meta();
+		$this->init_disable_add_to_cart_button_on_bad_id();
 	}
 
 	/**
@@ -111,6 +112,30 @@ class Holaplex_Wp_Public
 		wp_enqueue_script($this->plugin_name, plugin_dir_url(__FILE__) . 'js/holaplex-wp-public.js', array('jquery'), $this->version, false);
 		wp_enqueue_script('holaplex_ajax_public', plugin_dir_url(__FILE__) . 'js/holaplex-ajax-public.js', array('jquery'), $this->version, true);
 		wp_localize_script('holaplex_ajax_public', 'holaplex_ajax', array('ajax_url' => admin_url('admin-ajax.php')));
+	}
+
+	public function init_disable_add_to_cart_button_on_bad_id () {
+		$core = $this->core;
+		$holaplex_projects = $core->holaplex_projects;
+		function holaplex_product_is_purchaseable($is_purchasable, $product, $holaplex_projects) {
+
+			$drop_id = get_post_meta($product->get_id(), 'holaplex_drop_id', true);
+			$project_id = get_post_meta($product->get_id(), 'holaplex_project_id', true);
+			// check if project_id in $holaplex_projects
+			$project_exists = false;
+
+			foreach ($holaplex_projects as $project) {
+				if ($project['id'] === $project_id) {
+					$project_exists = true;
+				}
+			}
+
+			return $drop_id !== '' ? $project_exists : $is_purchasable;
+		}
+		add_filter('woocommerce_is_purchasable', function ($is_purchasable, $product) use ($holaplex_projects, $core) {
+			return holaplex_product_is_purchaseable($is_purchasable, $product, $holaplex_projects);
+		}, 10, 2);
+
 	}
 
 	public function show_drop_after_product_meta()
